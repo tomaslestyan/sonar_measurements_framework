@@ -27,7 +27,6 @@ public class MeasurementsSensor implements Sensor {
 	@Override
 	public void execute(SensorContext context) {
 		context.getSonarQubeVersion();
-
 	}
 
 }
