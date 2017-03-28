@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.Plugin;
 
+import main.java.db.SonarDbClient;
 import main.java.metrics.MetricsRegister;
 
 /**
@@ -22,6 +23,9 @@ public class MeasurementsPlugin implements Plugin {
 	 */
 	public MeasurementsPlugin() {
 		log.info("plugin created");
+		SonarDbClient client = new SonarDbClient(true);
+		client.createTables();
+		client.disconnect();
 	}
 
 	/* (non-Javadoc)

@@ -3,11 +3,21 @@ package main.java.metrics;
 
 import static java.util.Arrays.asList;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import org.sonar.api.measures.CoreMetrics;
 import org.sonar.api.measures.Metric;
 import org.sonar.api.measures.Metrics;
+
+import com.google.common.collect.ImmutableMap;
+
+import main.java.visitors.AVisitor;
+import main.java.visitors.ComplexityVisitor;
+import main.java.visitors.LinesOfCodeVisitor;
+import main.java.visitors.MaxNestingVisitor;
+import main.java.visitors.VariableVisitor;
 
 /**
  * @author Tomas
@@ -38,6 +48,17 @@ public class MetricsRegister implements Metrics {
 			.setQualitative(false)
 			.setDomain(CoreMetrics.DOMAIN_GENERAL)
 			.create();
+
+	private static final Map<Metric<? extends Serializable> , AVisitor> metricVisitors = ImmutableMap.<Metric<? extends Serializable> , AVisitor> builder()
+			.put(LOC, new LinesOfCodeVisitor())
+			.put(NOAV, new VariableVisitor())
+			.put(CYCLO, new ComplexityVisitor())
+			.put(MAXNESTING, new MaxNestingVisitor())
+			.build();
+
+	public static final Map<Metric<? extends Serializable> , AVisitor> getMetricVisitors() {
+		return metricVisitors;
+	}
 
 	/* (non-Javadoc)
 	 * @see org.sonar.api.measures.Metrics#getMetrics()

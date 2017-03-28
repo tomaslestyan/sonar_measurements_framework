@@ -12,6 +12,7 @@ import org.sonar.plugins.java.api.tree.ClassTree;
 import org.sonar.plugins.java.api.tree.MethodTree;
 
 import main.java.db.SonarDbClient;
+import main.java.metrics.MetricsRegister;
 
 /**
  * TODO
@@ -36,16 +37,47 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner{
 	@Override
 	public void visitClass(ClassTree tree) {
 		int line = tree.declarationKeyword().line();
-		new SonarDbClient().saveComponent(context.getFileKey() + "->" + tree.simpleName().name(), context.getFileKey(), line, 100);
+		SonarDbClient client = new SonarDbClient(true);
+		String componentID = context.getFileKey() + "->" + tree.simpleName().name();
+		client.saveComponent(componentID, context.getFileKey(),VisitorScope.CLASS.getValue(), line, 100);
+		saveClassMetrics(tree, componentID);
+		client.disconnect();
 		super.visitClass(tree);
 	}
+
 
 	/* (non-Javadoc)
 	 * @see org.sonar.plugins.java.api.tree.BaseTreeVisitor#visitMethod(org.sonar.plugins.java.api.tree.MethodTree)
 	 */
 	@Override
 	public void visitMethod(MethodTree tree) {
-		int line = tree.openParenToken().line();
+		SonarDbClient client = new SonarDbClient(true);
+		String componentID = context.getFileKey() + "->" + tree.simpleName().name();
+		client.saveComponent(componentID, context.getFileKey(), VisitorScope.METHOD.getValue(), tree.openParenToken().line(), tree.closeParenToken().line());
+		client.disconnect();
+		saveMethodMetrics(tree, componentID);
+		super.visitMethod(tree);
 	}
 
+	private void saveMethodMetrics(MethodTree tree, String componentID) {
+		SonarDbClient client = new SonarDbClient(true);
+		MetricsRegister.getMetricVisitors().entrySet().stream().filter(x -> x.getValue().getScope() == VisitorScope.ALL || x.getValue().getScope() == VisitorScope.METHOD).forEach(y -> {
+			AVisitor visitor = y.getValue();
+			visitor.scanMethod(tree);
+			client.saveMeasure(y.getKey(), componentID, visitor.getResult());
+
+		});
+		client.disconnect();
+	}
+
+	private void saveClassMetrics(ClassTree tree, String componentID) {
+		SonarDbClient client = new SonarDbClient(true);
+		MetricsRegister.getMetricVisitors().entrySet().stream().filter(x -> x.getValue().getScope() == VisitorScope.ALL || x.getValue().getScope() == VisitorScope.CLASS).forEach(y -> {
+			AVisitor visitor = y.getValue();
+			visitor.scanClass(tree);
+			client.saveMeasure(y.getKey(), componentID, visitor.getResult());
+
+		});
+		client.disconnect();
+	}
 }

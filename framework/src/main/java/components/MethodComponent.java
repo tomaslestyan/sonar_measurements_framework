@@ -4,6 +4,8 @@
 package main.java.components;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -12,13 +14,32 @@ import java.util.Map;
  */
 public class MethodComponent implements IComponent {
 
+	private String id;
+	private String sonarComponentID;
+	private String parentClass;
+	private Map<Object, Object> measures = new HashMap<>();
+
+
+	/**
+	 * Constructor
+	 * @param id
+	 * @param sonarComponentID
+	 * @param parentClass
+	 * @param measures
+	 */
+	public MethodComponent(String id, String sonarComponentID, String parentClass, Map<Object, Object> measures) {
+		this.id = id;
+		this.sonarComponentID = sonarComponentID;
+		this.parentClass = parentClass;
+		this.measures = measures;
+	}
+
 	/* (non-Javadoc)
 	 * @see main.java.components.IComponent#getSonarComponentID()
 	 */
 	@Override
 	public String getSonarComponentID() {
-		// TODO Auto-generated method stub
-		return null;
+		return sonarComponentID;
 	}
 
 	/* (non-Javadoc)
@@ -26,8 +47,7 @@ public class MethodComponent implements IComponent {
 	 */
 	@Override
 	public String getID() {
-		// TODO Auto-generated method stub
-		return null;
+		return id;
 	}
 
 	/* (non-Javadoc)
@@ -35,8 +55,7 @@ public class MethodComponent implements IComponent {
 	 */
 	@Override
 	public Collection<IComponent> getChildComponents() {
-		// TODO Auto-generated method stub
-		return null;
+		return Collections.emptyList();
 	}
 
 	/* (non-Javadoc)
@@ -44,8 +63,7 @@ public class MethodComponent implements IComponent {
 	 */
 	@Override
 	public Map<Object, Object> getMeasures() {
-		// TODO Auto-generated method stub
-		return null;
+		return measures;
 	}
 
 }
