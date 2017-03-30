@@ -15,7 +15,7 @@ public class ComponentFactory {
 
 	public static Collection<IComponent> getComponents() {
 		SonarDbClient client = new SonarDbClient(true);
-		Collection<IComponent> components = client.getComponents();
+		Collection<IComponent> components = client.getComponents(null);
 		client.disconnect();
 		return components;
 	}

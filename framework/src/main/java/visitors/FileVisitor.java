@@ -10,6 +10,8 @@ import org.sonar.plugins.java.api.JavaFileScannerContext;
 import org.sonar.plugins.java.api.tree.BaseTreeVisitor;
 import org.sonar.plugins.java.api.tree.ClassTree;
 import org.sonar.plugins.java.api.tree.MethodTree;
+import org.sonar.plugins.java.api.tree.Tree;
+import org.sonar.plugins.java.api.tree.Tree.Kind;
 
 import main.java.db.SonarDbClient;
 import main.java.metrics.MetricsRegister;
@@ -39,7 +41,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner{
 		int line = tree.declarationKeyword().line();
 		SonarDbClient client = new SonarDbClient(true);
 		String componentID = context.getFileKey() + "->" + tree.simpleName().name();
-		client.saveComponent(componentID, context.getFileKey(),VisitorScope.CLASS.getValue(), line, 100);
+		client.saveComponent(componentID, context.getFileKey(), getParentID(tree), VisitorScope.CLASS.getValue(), line, 100);
 		saveClassMetrics(tree, componentID);
 		client.disconnect();
 		super.visitClass(tree);
@@ -53,10 +55,22 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner{
 	public void visitMethod(MethodTree tree) {
 		SonarDbClient client = new SonarDbClient(true);
 		String componentID = context.getFileKey() + "->" + tree.simpleName().name();
-		client.saveComponent(componentID, context.getFileKey(), VisitorScope.METHOD.getValue(), tree.openParenToken().line(), tree.closeParenToken().line());
+		getParentID(tree);
+		client.saveComponent(componentID, context.getFileKey(), getParentID(tree), VisitorScope.METHOD.getValue(), tree.openParenToken().line(), tree.closeParenToken().line());
 		client.disconnect();
 		saveMethodMetrics(tree, componentID);
 		super.visitMethod(tree);
+	}
+
+	/**
+	 * @param tree
+	 */
+	private String getParentID(Tree tree) {
+		Tree parent = tree.parent();
+		if (parent.is(Kind.CLASS)) {
+			return context.getFileKey() + "->" + ((ClassTree) parent).simpleName();
+		}
+		return null;
 	}
 
 	private void saveMethodMetrics(MethodTree tree, String componentID) {

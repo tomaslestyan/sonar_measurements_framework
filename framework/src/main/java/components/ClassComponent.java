@@ -10,38 +10,18 @@ import java.util.Map;
  * @author Tomas
  *
  */
-public class ClassComponent implements IComponent {
+public class ClassComponent extends AComponent {
 
-	/* (non-Javadoc)
-	 * @see main.java.components.IComponent#getSonarComponentID()
+	/**
+	 * Constructor
+	 * @param id
+	 * @param sonarComponentID
+	 * @param parentClass
+	 * @param children
+	 * @param measures
 	 */
-	@Override
-	public String getSonarComponentID() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/* (non-Javadoc)
-	 * @see main.java.components.IComponent#getID()
-	 */
-	@Override
-	public String getID() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/* (non-Javadoc)
-	 * @see main.java.components.IComponent#getChildComponents()
-	 */
-	@Override
-	public Collection<IComponent> getChildComponents() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Map<Object, Object> getMeasures() {
-		// TODO Auto-generated method stub
-		return null;
+	public ClassComponent(String id, String sonarComponentID, String parentClass, Collection<IComponent> children,
+			Map<Object, Object> measures) {
+		super(id, sonarComponentID, parentClass, children, measures);
 	}
 }
