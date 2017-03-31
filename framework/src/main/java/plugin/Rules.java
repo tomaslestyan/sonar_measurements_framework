@@ -6,8 +6,6 @@ package main.java.plugin;
 
 import java.util.Arrays;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sonar.api.server.rule.RulesDefinition;
 import org.sonar.plugins.java.Java;
 import org.sonar.squidbridge.annotations.AnnotationBasedRulesDefinition;
@@ -18,8 +16,7 @@ import org.sonar.squidbridge.annotations.AnnotationBasedRulesDefinition;
  */
 public class Rules implements RulesDefinition {
 
-	/** The logger object */
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	/** The rules repository of the framework */
 	public static final String REPOSITORY = "framework";
 
 	/* (non-Javadoc)

@@ -14,6 +14,10 @@ import main.java.db.SonarDbClient;
  */
 public class ComponentFactory {
 
+	private ComponentFactory() {
+		// do not allow to create instances
+	}
+
 	/**
 	 * @return collection of components, null if connection failed (check the log in that case)
 	 */

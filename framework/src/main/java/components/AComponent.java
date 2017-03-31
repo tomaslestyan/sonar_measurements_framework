@@ -115,8 +115,7 @@ public abstract class AComponent implements IComponent {
 		return  Objects.equal(children, other.children) 
 				&& Objects.equal(id, other.id) 
 				&& Objects.equal(parentClass, other.parentClass) 
-				&& Objects.equal(sonarComponentID, other.sonarComponentID) 
-				&& Objects.equal(parentClass, other.parentClass);
+				&& Objects.equal(sonarComponentID, other.sonarComponentID);
 	}
 
 	/* (non-Javadoc)
