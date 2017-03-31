@@ -1,5 +1,8 @@
+/**
+ * The MIT License (MIT)
+ * Copyright (c) 2016 FI MUNI
+ */
 package main.java.plugin;
-
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +26,7 @@ public class MeasurementsPlugin implements Plugin {
 	 */
 	public MeasurementsPlugin() {
 		log.info("plugin created");
+		// create tables if runs first time
 		SonarDbClient client = new SonarDbClient(true);
 		client.createTables();
 		client.disconnect();

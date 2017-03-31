@@ -1,6 +1,6 @@
 /**
  * The MIT License (MIT)
- * Copyright (c) 2016 Tomas Lestyan
+ * Copyright (c) 2016 FI MUNI
  */
 package main.java.visitors;
 
@@ -26,21 +26,21 @@ public enum VisitorScope {
 	 * @return the value of the scope
 	 */
 	public String getValue() {
-	        return value;
-	    }
+		return value;
+	}
 
-	 /**
-	  * Get {@link VisitorScope} value from given {@link String} value
+	/**
+	 * Get {@link VisitorScope} value from given {@link String} value
 	 * @param value
 	 * @return
 	 */
 	public static VisitorScope getScope(String value) {
-	        for(VisitorScope scope : values())
-	            if (scope.getValue().equalsIgnoreCase(value)) {
-	            	return scope;
-	            }
-	        throw new IllegalArgumentException();
-	    }
+		for(VisitorScope scope : values())
+			if (scope.getValue().equalsIgnoreCase(value)) {
+				return scope;
+			}
+		throw new IllegalArgumentException();
+	}
 
 	/*
 	 * (non-Javadoc)

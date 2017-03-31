@@ -1,13 +1,14 @@
 /**
- * 
+ * The MIT License (MIT)
+ * Copyright (c) 2016 FI MUNI
  */
 package main.java.components;
 
 import java.util.Map;
 
 /**
+ * Method component
  * @author Tomas
- *
  */
 public class MethodComponent extends AComponent {
 

@@ -1,5 +1,6 @@
 /**
- * 
+ * The MIT License (MIT)
+ * Copyright (c) 2016 FI MUNI
  */
 package main.java.components;
 
@@ -12,16 +13,21 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 /**
+ * Abstract class for regular components (method classes)
  * @author Tomas
- *
  */
 public abstract class AComponent implements IComponent {
 
+	/** Unique ID of the component*/
 	private String id;
+	/** ID of the sonar FILE component */
 	private String sonarComponentID;
+	/** The parent class of the component (not super class nor interface) in which it is located, null for regular classes */
 	private String parentClass;
+	/** Collection of child components, e.g., nested classes, anonymous classes or methods  */
 	private Collection<IComponent> children;
-	private Map<Object, Object> measures = new HashMap<>();
+	/** Measures of the component (key: metric, value: measure for the metric)  */
+	private Map<Object, Object> measures = new HashMap<>(); // FIXME <Object, Object> is only for evaluation purpose, should be changed into something reasonable
 
 	/**
 	 * Constructor
@@ -54,6 +60,14 @@ public abstract class AComponent implements IComponent {
 	@Override
 	public String getID() {
 		return id;
+	}
+
+	/* (non-Javadoc)
+	 * @see main.java.components.IComponent#getParent()
+	 */
+	@Override
+	public String getParent() {
+		return parentClass;
 	}
 
 	/* (non-Javadoc)

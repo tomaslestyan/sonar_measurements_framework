@@ -1,3 +1,7 @@
+/**
+ * The MIT License (MIT)
+ * Copyright (c) 2016 FI MUNI
+ */
 package main.java.db;
 
 import java.io.Serializable;
@@ -27,13 +31,18 @@ public class SonarDbClient {
 
 	/** The logger object */
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	/** Timeout for reasonable connection validation */
 	private static final int DEFAULT_TIMEOUT = 1000;
+	/** URL of  embedded SonarQube DB */
 	private static final String DB_URL = "jdbc:h2:tcp://localhost:9092/sonar";
+	/** H2 driver used */
 	private static final String JDBC_H2_DRIVER = "org.h2.Driver";
+	/** DB connection */
 	private Connection connection;
 
 	/**
 	 * Constructor
+	 * @param connect <code>true</code> for establish connection with DB, false when connection will be established later. Use connect() method in that case.
 	 */
 	public SonarDbClient(boolean connect) {
 		if (connect) {
@@ -41,6 +50,10 @@ public class SonarDbClient {
 		}
 	}
 
+	/**
+	 * (Try to) Establish DB connection
+	 * Do not forget to call disconnect() after session ends.
+	 */
 	public void connect() {
 		try {
 			if (!isConnected()) {				
@@ -54,6 +67,9 @@ public class SonarDbClient {
 		}
 	}
 
+	/**
+	 * Disconnect from DB. It has to be used to terminate connection.
+	 */
 	public void disconnect() {
 		try {
 			if (connection != null) {
@@ -64,6 +80,9 @@ public class SonarDbClient {
 		}
 	}
 
+	/**
+	 * @return <code>true</code> if client is connected, <code>false</code> otherwise
+	 */
 	public boolean isConnected() {
 		try {
 			return isConnectionValid();
@@ -74,6 +93,10 @@ public class SonarDbClient {
 	}
 
 
+	/**
+	 * Create mandatory tables in Sonar DB if they were not created yet.
+	 * @return <code>true</code> if tables was created or the were created before, <code>false</code> otherwise
+	 */
 	public boolean createTables() {
 		try {
 			// check connection
@@ -91,6 +114,15 @@ public class SonarDbClient {
 		return true;
 	}
 
+	/**
+	 * Save component into DB
+	 * @param id
+	 * @param sonarComponentID
+	 * @param parent
+	 * @param type
+	 * @param startLine
+	 * @param endLine
+	 */
 	public void saveComponent(String id, String sonarComponentID, String parent, String type, int startLine, int endLine) {
 		try {
 			// check connection
@@ -105,6 +137,12 @@ public class SonarDbClient {
 		}
 	}
 
+	/**
+	 * Save measure into DB
+	 * @param metric
+	 * @param componentID
+	 * @param value
+	 */
 	public void saveMeasure(Metric<? extends Serializable> metric, String componentID, int value) {
 		try {
 			// check connection
@@ -119,6 +157,10 @@ public class SonarDbClient {
 		}
 	}
 
+	/** Get components from components table in embedded DB.
+	 * @param parent the parent component, for all components it should be <code>null</code>
+	 * @return collections of components
+	 */
 	public Collection<IComponent> getComponents(String parent) {
 		try {
 			// check connection
@@ -127,14 +169,16 @@ public class SonarDbClient {
 			}
 			Collection<IComponent> components = new ArrayList<>();
 			Statement st = connection.createStatement();
-			ResultSet queryResult = (parent == null) ? st.executeQuery("SELECT * FROM Components") : st.executeQuery("SELECT * FROM Components WHERE parent = '%s' "); 
-			while (queryResult.next()) {
-				IComponent component = parseComponentFromQuery(queryResult);
-				if (component != null) {
-					components.add(component);
-				}
-			}
-			return components;
+			ResultSet queryResult = (parent == null) 
+					? st.executeQuery("SELECT * FROM Components") 
+							: st.executeQuery(String.format("SELECT * FROM Components WHERE parent = '%s' ", parent)); 
+					while (queryResult.next()) {
+						IComponent component = parseComponentFromQuery(queryResult);
+						if (component != null) {
+							components.add(component);
+						}
+					}
+					return components;
 		} catch (SQLException e) {
 			log.warn("Can't retrieve components", e);
 		}
@@ -142,7 +186,7 @@ public class SonarDbClient {
 	}
 
 	/**
-	 * @param components
+	 * Parse component from query result
 	 * @param queryResult
 	 * @throws SQLException
 	 */
@@ -162,6 +206,11 @@ public class SonarDbClient {
 		return null;
 	}
 
+	/**
+	 * Get measures for given component
+	 * @param id if of the component
+	 * @return measures
+	 */
 	private Map<Object, Object> getMeasures(String id) {
 		try {
 			// check connection
@@ -183,12 +232,18 @@ public class SonarDbClient {
 		return null;
 	}
 
+	/**
+	 * Check if connection is valid
+	 * @return <code>true</code> if is valid, <code>false</code> otherwise
+	 * @throws SQLException
+	 */
 	private boolean isConnectionValid() throws SQLException {
 		return connection != null && connection.isValid(DEFAULT_TIMEOUT);
 	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#finalize()
+	 * Do not rely on this finalize. Yes it disconnects from DB, but not guaranteed when the GC will call it. 
 	 */
 	@Override
 	protected void finalize() throws Throwable {

@@ -1,5 +1,6 @@
 /**
- *
+ * The MIT License (MIT)
+ * Copyright (c) 2016 FI MUNI
  */
 package main.java.plugin;
 
@@ -12,6 +13,7 @@ import org.sonar.plugins.java.Java;
 import org.sonar.squidbridge.annotations.AnnotationBasedRulesDefinition;
 
 /**
+ * Rules for satisfy SonarQue mechanisms
  * @author Tomas Lestyan
  */
 public class Rules implements RulesDefinition {

@@ -1,4 +1,7 @@
-
+/**
+ * The MIT License (MIT)
+ * Copyright (c) 2016 FI MUNI
+ */
 package main.java.metrics;
 
 import static java.util.Arrays.asList;
@@ -20,8 +23,8 @@ import main.java.visitors.MaxNestingVisitor;
 import main.java.visitors.VariableVisitor;
 
 /**
+ * Class for register metrics. It registers metric for SonarQube but mainly it just connects the metrics with their visitors.
  * @author Tomas
- *
  */
 public class MetricsRegister implements Metrics {
 
@@ -56,6 +59,9 @@ public class MetricsRegister implements Metrics {
 			.put(MAXNESTING, new MaxNestingVisitor())
 			.build();
 
+	/**
+	 * @return get visitors of metrics
+	 */
 	public static final Map<Metric<? extends Serializable> , AVisitor> getMetricVisitors() {
 		return metricVisitors;
 	}
