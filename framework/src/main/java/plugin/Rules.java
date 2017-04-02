@@ -7,7 +7,6 @@ package main.java.plugin;
 import java.util.Arrays;
 
 import org.sonar.api.server.rule.RulesDefinition;
-import org.sonar.plugins.java.Java;
 import org.sonar.squidbridge.annotations.AnnotationBasedRulesDefinition;
 
 /**
@@ -24,8 +23,8 @@ public class Rules implements RulesDefinition {
 	 */
 	@Override
 	public void define(Context context) {
-		NewRepository repository = context.createRepository(REPOSITORY, Java.KEY).setName("Framework Rules repository");
-		new AnnotationBasedRulesDefinition(repository, Java.KEY).addRuleClasses(false, false, Arrays.asList(JavaChecks.checkClasses()));
+		NewRepository repository = context.createRepository(REPOSITORY, "java").setName("Framework Rules repository");
+		new AnnotationBasedRulesDefinition(repository, "java").addRuleClasses(false, false, Arrays.asList(JavaChecks.checkClasses()));
 		repository.done();
 	}
 
