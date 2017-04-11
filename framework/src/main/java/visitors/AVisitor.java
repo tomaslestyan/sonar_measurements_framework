@@ -16,7 +16,7 @@ public abstract class AVisitor extends BaseTreeVisitor {
 
 	public abstract String getKey();
 
-	public abstract VisitorScope getScope();
+	public abstract Scope getScope();
 
 	public abstract int getResult();
 

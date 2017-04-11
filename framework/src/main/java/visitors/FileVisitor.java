@@ -4,14 +4,21 @@
  */
 package main.java.visitors;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.sonar.check.Rule;
 import org.sonar.plugins.java.api.JavaFileScanner;
 import org.sonar.plugins.java.api.JavaFileScannerContext;
 import org.sonar.plugins.java.api.tree.BaseTreeVisitor;
 import org.sonar.plugins.java.api.tree.ClassTree;
+import org.sonar.plugins.java.api.tree.CompilationUnitTree;
+import org.sonar.plugins.java.api.tree.ListTree;
 import org.sonar.plugins.java.api.tree.MethodTree;
 import org.sonar.plugins.java.api.tree.Tree;
 import org.sonar.plugins.java.api.tree.Tree.Kind;
+import org.sonar.plugins.java.api.tree.TypeTree;
 
 import main.java.db.SonarDbClient;
 import main.java.metrics.MetricsRegister;
@@ -32,7 +39,8 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner{
 	@Override
 	public void scanFile(JavaFileScannerContext context) {
 		this.context = context;
-		scan(context.getTree());
+		CompilationUnitTree tree = context.getTree();
+		scan(tree);
 	}
 
 	/* (non-Javadoc)
@@ -40,10 +48,15 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner{
 	 */
 	@Override
 	public void visitClass(ClassTree tree) {
+		List<String> imports = getImports();
 		int line = tree.declarationKeyword().line();
+		int endLine = tree.lastToken().line();
 		SonarDbClient client = new SonarDbClient(true);
 		String componentID = context.getFileKey() + "->" + tree.simpleName().name();
-		client.saveComponent(componentID, context.getFileKey(), getParentID(tree), VisitorScope.CLASS.getValue(), line, 100);
+		TypeTree superClass = tree.superClass();
+		ListTree<TypeTree> superInterfaces = tree.superInterfaces();
+		client.saveComponent(componentID, context.getFileKey(), getParentID(tree), Scope.CLASS.getValue(), 
+				getPackageName(), getClassName(superClass), superInterfaces.stream().map(x -> getClassName(x)).collect(Collectors.toList()), line, endLine);
 		saveClassMetrics(tree, componentID);
 		client.disconnect();
 		super.visitClass(tree);
@@ -57,7 +70,8 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner{
 		SonarDbClient client = new SonarDbClient(true);
 		String componentID = context.getFileKey() + "->" + tree.simpleName().name();
 		getParentID(tree);
-		client.saveComponent(componentID, context.getFileKey(), getParentID(tree), VisitorScope.METHOD.getValue(), tree.openParenToken().line(), tree.closeParenToken().line());
+		client.saveComponent(componentID, context.getFileKey(), getParentID(tree), Scope.METHOD.getValue(), 
+				getPackageName(), null, Collections.emptyList(), tree.firstToken().line(), tree.lastToken().line());
 		client.disconnect();
 		saveMethodMetrics(tree, componentID);
 		super.visitMethod(tree);
@@ -83,7 +97,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner{
 	 */
 	private void saveMethodMetrics(MethodTree tree, String componentID) {
 		SonarDbClient client = new SonarDbClient(true);
-		MetricsRegister.getMetricVisitors().entrySet().stream().filter(x -> x.getValue().getScope() == VisitorScope.ALL || x.getValue().getScope() == VisitorScope.METHOD).forEach(y -> {
+		MetricsRegister.getMetricVisitors().entrySet().stream().filter(x -> x.getValue().getScope() == Scope.ALL || x.getValue().getScope() == Scope.METHOD).forEach(y -> {
 			AVisitor visitor = y.getValue();
 			visitor.scanMethod(tree);
 			client.saveMeasure(y.getKey(), componentID, visitor.getResult());
@@ -99,12 +113,33 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner{
 	 */
 	private void saveClassMetrics(ClassTree tree, String componentID) {
 		SonarDbClient client = new SonarDbClient(true);
-		MetricsRegister.getMetricVisitors().entrySet().stream().filter(x -> x.getValue().getScope() == VisitorScope.ALL || x.getValue().getScope() == VisitorScope.CLASS).forEach(y -> {
+		MetricsRegister.getMetricVisitors().entrySet().stream().filter(x -> x.getValue().getScope() == Scope.ALL || x.getValue().getScope() == Scope.CLASS).forEach(y -> {
 			AVisitor visitor = y.getValue();
 			visitor.scanClass(tree);
 			client.saveMeasure(y.getKey(), componentID, visitor.getResult());
 
 		});
 		client.disconnect();
+	}
+
+	/**
+	 * @return
+	 */
+	private List<String> getImports() {
+		return context.getTree().imports().stream().map(x -> x.firstToken().text()).collect(Collectors.toList());
+	}
+
+	/**
+	 * @return
+	 */
+	private String getPackageName() {
+		return context.getTree().packageDeclaration().packageName().firstToken().text();
+	}
+
+	private String getClassName(TypeTree tree) {
+		if ((tree != null) && tree.is(Kind.IDENTIFIER)) {
+			return tree.firstToken().text();
+		}
+		return null;
 	}
 }

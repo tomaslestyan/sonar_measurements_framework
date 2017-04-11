@@ -28,22 +28,28 @@ public abstract class AComponent implements IComponent {
 	private Collection<IComponent> children;
 	/** Measures of the component (key: metric, value: measure for the metric)  */
 	private Map<Object, Object> measures = new HashMap<>(); // FIXME <Object, Object> is only for evaluation purpose, should be changed into something reasonable
+	/** The starting line of the component */
+	private int startLine;
+	/** The ending line of the component */
+	private int endLine;
 
 	/**
 	 * Constructor
 	 * @param id
 	 * @param sonarComponentID
 	 * @param parentClass
-	 * @param children
 	 * @param measures
+	 * @param endLine 
+	 * @param startLine 
 	 */
-	protected AComponent(String id, String sonarComponentID, String parentClass, Collection<IComponent> children,
-			Map<Object, Object> measures) {
+	protected AComponent(String id, String sonarComponentID, String parentClass,  Collection<IComponent> children, Map<Object, Object> measures, int startLine, int endLine) {
 		this.id = id;
 		this.sonarComponentID = sonarComponentID;
 		this.parentClass = parentClass;
-		this.children = children;
 		this.measures = measures;
+		this.startLine = startLine;
+		this.endLine = endLine;
+		this.children = (children == null) ? Collections.emptyList() : children;
 	}
 
 	/* (non-Javadoc)
@@ -86,6 +92,20 @@ public abstract class AComponent implements IComponent {
 		return measures;
 	}
 
+	/**
+	 * @return the startLine
+	 */
+	public int getStartLine() {
+		return startLine;
+	}
+
+	/**
+	 * @return the endLine
+	 */
+	public int getEndLine() {
+		return endLine;
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -99,6 +119,7 @@ public abstract class AComponent implements IComponent {
 		result = prime * result + ((sonarComponentID == null) ? 0 : sonarComponentID.hashCode());
 		return result;
 	}
+
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
@@ -124,5 +145,6 @@ public abstract class AComponent implements IComponent {
 	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this.getClass()).add("id", id).toString();
+
 	}
 }
