@@ -92,6 +92,14 @@ public abstract class AComponent implements IComponent {
 		return measures;
 	}
 
+	/* (non-Javadoc)
+	 * @see main.java.components.IComponent#addComplexMeasure(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public void addComplexMeasure(Object metricID, Object value) {
+		measures.put(metricID, value);
+	}
+
 	/**
 	 * @return the startLine
 	 */
