@@ -7,6 +7,9 @@ package main.java.components;
 import java.util.Collection;
 import java.util.Map;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 /**
  * Custom component interface
  * @author Tomas
@@ -38,5 +41,30 @@ public interface IComponent {
 	 * FIXME <Object, Object> is only for evaluation purpose, should be changed into something reasonable
 	 */
 	Map<Object, Object> getMeasures();
+
+	/**
+	 * Add an additional derived measure. This measure is computed on the side of the host plugin and its value will be not stored in Sonar DB
+	 * @param metricID
+	 * @param value
+	 */
+	void addComplexMeasure(Object metricID, Object value);
+
+	/**
+	 * Draft of the JSon format
+	 * @return JSonRepresentation of the component
+	 */
+	@SuppressWarnings("unchecked")
+	default String getComponentAsJsonString () {
+		JSONObject componentJson = new JSONObject();
+		JSONArray measuresJson = new JSONArray();
+		getMeasures().forEach((k, v) -> {
+			JSONObject measureJson = new JSONObject();
+			measureJson.put(k, v);
+			measuresJson.add(measureJson.toJSONString());
+		});
+		componentJson.put("id", getID());
+		componentJson.put("measures", measuresJson.toJSONString());
+		return null;
+	}
 
 }

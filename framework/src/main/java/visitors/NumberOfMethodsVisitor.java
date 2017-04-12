@@ -37,8 +37,8 @@ public class NumberOfMethodsVisitor extends AVisitor {
 	 * @see main.java.visitors.ADisharmonyVisitor#getScope()
 	 */
 	@Override
-	public VisitorScope getScope() {
-		return VisitorScope.CLASS;
+	public Scope getScope() {
+		return Scope.CLASS;
 	}
 
 	/* (non-Javadoc)

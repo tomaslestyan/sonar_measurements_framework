@@ -4,9 +4,9 @@
  */
 package main.java.visitors;
 
-import org.sonar.plugins.java.api.tree.BlockTree;
 import org.sonar.plugins.java.api.tree.ClassTree;
 import org.sonar.plugins.java.api.tree.MethodTree;
+import org.sonar.plugins.java.api.tree.Tree;
 
 /**
  * TODO
@@ -30,8 +30,8 @@ public class LinesOfCodeVisitor extends AVisitor {
 	 * @see main.java.visitors.ADisharmonyVisitor#getScope()
 	 */
 	@Override
-	public VisitorScope getScope() {
-		return VisitorScope.ALL;
+	public Scope getScope() {
+		return Scope.ALL;
 	}
 
 	/* (non-Javadoc)
@@ -47,31 +47,26 @@ public class LinesOfCodeVisitor extends AVisitor {
 	 */
 	@Override
 	public void scanMethod(MethodTree tree) {
-		lines = 0;
-		scan(tree);
+		countLines(tree);
 	}
+
 
 	/* (non-Javadoc)
 	 * @see main.java.visitors.ADisharmonyVisitor#scanClass(org.sonar.plugins.java.api.tree.ClassTree)
 	 */
 	@Override
 	public void scanClass(ClassTree tree) {
-		// TODO
+		countLines(tree);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.sonar.plugins.java.api.tree.BaseTreeVisitor#visitMethod(org.sonar.plugins.java.api.tree.MethodTree)
+	/**
+	 * Count lines in given tree
+	 * @param tree
 	 */
-	@Override
-	public void visitMethod(MethodTree tree) {
-		BlockTree block = tree.block();
-		int start = 0;
-		int end = 0;
-		if (block != null) {
-			start = block.openBraceToken().line();
-			end = block.closeBraceToken().line();
-		}
-		lines = end - start + 1;  //FIXME not accurate, find better way
+	private void countLines(Tree tree) {
+		lines = 0;
+		int start = tree.firstToken().line();
+		int end = tree.lastToken().line();
+		lines = end - start + 1;
 	}
-
 }
