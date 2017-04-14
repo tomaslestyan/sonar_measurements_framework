@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.sonar.api.batch.Phase;
 import org.sonar.check.Rule;
 import org.sonar.plugins.java.api.JavaFileScanner;
 import org.sonar.plugins.java.api.JavaFileScannerContext;
@@ -27,6 +28,7 @@ import main.java.metrics.MetricsRegister;
  * Class for visiting Java files. The purpose of the class is to visit each class and method and store information about this components including measures of available metrics.
  * @author Tomas
  */
+@Phase(name = Phase.Name.PRE)
 @Rule(key = "framework", name="framework", description="blank rule")
 public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner{
 

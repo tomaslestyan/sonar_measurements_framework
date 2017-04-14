@@ -27,7 +27,7 @@ public class Builder {
 	/** Collection of child components, e.g., nested classes, anonymous classes or methods  */
 	private Collection<IComponent> children;
 	/** Measures of the component (key: metric, value: measure for the metric)  */
-	private Map<Object, Object> measures = new HashMap<>(); // FIXME <Object, Object> is only for evaluation purpose, should be changed into something reasonable
+	private Map<String, Integer> measures = new HashMap<>();
 	/** The name of the package */
 	private String packageName;
 	/** The super class of the class component, for other components should be <code>null</code> */
@@ -87,7 +87,7 @@ public class Builder {
 	 * @param measures the measures to set
 	 * @return the instance of the builder
 	 */
-	public Builder setMeasures(Map<Object, Object> measures) {
+	public Builder setMeasures(Map<String, Integer> measures) {
 		this.measures = measures;
 		return this;
 	}

@@ -27,7 +27,7 @@ public abstract class AComponent implements IComponent {
 	/** Collection of child components, e.g., nested classes, anonymous classes or methods  */
 	private Collection<IComponent> children;
 	/** Measures of the component (key: metric, value: measure for the metric)  */
-	private Map<Object, Object> measures = new HashMap<>(); // FIXME <Object, Object> is only for evaluation purpose, should be changed into something reasonable
+	private Map<String, Integer> measures = new HashMap<>();
 	/** The starting line of the component */
 	private int startLine;
 	/** The ending line of the component */
@@ -42,7 +42,7 @@ public abstract class AComponent implements IComponent {
 	 * @param endLine 
 	 * @param startLine 
 	 */
-	protected AComponent(String id, String sonarComponentID, String parentClass,  Collection<IComponent> children, Map<Object, Object> measures, int startLine, int endLine) {
+	protected AComponent(String id, String sonarComponentID, String parentClass,  Collection<IComponent> children, Map<String, Integer> measures, int startLine, int endLine) {
 		this.id = id;
 		this.sonarComponentID = sonarComponentID;
 		this.parentClass = parentClass;
@@ -88,7 +88,7 @@ public abstract class AComponent implements IComponent {
 	 * @see main.java.components.IComponent#getMeasures()
 	 */
 	@Override
-	public Map<Object, Object> getMeasures() {
+	public Map<String, Integer> getMeasures() {
 		return measures;
 	}
 
@@ -96,20 +96,22 @@ public abstract class AComponent implements IComponent {
 	 * @see main.java.components.IComponent#addComplexMeasure(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public void addComplexMeasure(Object metricID, Object value) {
+	public void addComplexMeasure(String metricID, Integer value) {
 		measures.put(metricID, value);
 	}
 
-	/**
-	 * @return the startLine
+	/* (non-Javadoc)
+	 * @see main.java.components.IComponent#getStartLine()
 	 */
+	@Override
 	public int getStartLine() {
 		return startLine;
 	}
 
-	/**
-	 * @return the endLine
+	/* (non-Javadoc)
+	 * @see main.java.components.IComponent#getEndLine()
 	 */
+	@Override
 	public int getEndLine() {
 		return endLine;
 	}

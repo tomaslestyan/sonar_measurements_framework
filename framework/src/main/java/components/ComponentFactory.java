@@ -5,6 +5,7 @@
 package main.java.components;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 import main.java.db.SonarDbClient;
 
@@ -26,5 +27,12 @@ public class ComponentFactory {
 		Collection<IComponent> components = client.getComponents(null);
 		client.disconnect();
 		return components;
+	}
+
+	/**
+	 * @return collection of Class components, null if connection failed (check the log in that case)
+	 */
+	public static Collection<IComponent> getClassComponents() {
+		return getComponents().stream().filter(x -> x instanceof ClassComponent).collect(Collectors.toList());
 	}
 }

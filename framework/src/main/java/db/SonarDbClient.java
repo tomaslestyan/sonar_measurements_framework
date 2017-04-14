@@ -173,7 +173,7 @@ public class SonarDbClient {
 			return;
 		}
 		try (Statement st = connection.createStatement()) {
-			st.executeUpdate(String.format("INSERT INTO RecentMeasures (value , Componentsid, Metricsid) VALUES (%s, '%s', '%s')", value, componentID, metric.getName()));
+			st.executeUpdate(String.format("INSERT INTO RecentMeasures (value , Componentsid, Metricsid) VALUES (%s, '%s', '%s')", value, componentID, metric.getKey()));
 		} catch (SQLException e) {
 			log.warn("Can't save the measurement for metric: " + metric.getKey(), e);
 		}
@@ -221,7 +221,7 @@ public class SonarDbClient {
 		String interfaces = queryResult.getString("interfaces");
 		int start = queryResult.getInt("STARTLINE");
 		int end = queryResult.getInt("ENDLINE");
-		Map<Object, Object> measures = getMeasures(id);
+		Map<String, Integer> measures = getMeasures(id);
 		if (type.equalsIgnoreCase("2")) {
 			return MethodComponent.builder()
 					.setId(id)
@@ -254,13 +254,13 @@ public class SonarDbClient {
 	 * @param id if of the component
 	 * @return measures
 	 */
-	private Map<Object, Object> getMeasures(String id) {
+	private Map<String, Integer> getMeasures(String id) {
 		// check connection
 		if (!isConnectionValid()) {
 			return null;
 		}
 		try (Statement st = connection.createStatement()) {
-			Map<Object, Object> measures = new HashMap<>();
+			Map<String, Integer> measures = new HashMap<>();
 			ResultSet queryResult = st.executeQuery(String.format("SELECT * FROM RecentMeasures WHERE Componentsid = '%s' ", id));
 			while (queryResult.next()) {
 				String metric = queryResult.getString("Metricsid");

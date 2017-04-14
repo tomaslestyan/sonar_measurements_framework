@@ -24,7 +24,7 @@ public class MethodComponent extends AComponent {
 	 * @param endLine 
 	 * @param startLine 
 	 */
-	MethodComponent(String id, String sonarComponentID, String parentClass, Map<Object, Object> measures, int startLine, int endLine) {
+	MethodComponent(String id, String sonarComponentID, String parentClass, Map<String, Integer> measures, int startLine, int endLine) {
 		super(id, sonarComponentID, parentClass, null, measures, startLine, endLine);
 	}
 

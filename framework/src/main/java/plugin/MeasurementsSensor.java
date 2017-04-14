@@ -8,8 +8,6 @@ import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 
-import main.java.components.ComponentFactory;
-
 /**
  * Sensor for testing purposes
  * @author Tomas
@@ -30,7 +28,6 @@ public class MeasurementsSensor implements Sensor {
 	@Override
 	public void execute(SensorContext context) {
 		context.getSonarQubeVersion();
-		ComponentFactory.getComponents();
 	}
 
 }
