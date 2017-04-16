@@ -4,8 +4,9 @@
  */
 package main.java.visitors;
 
-import org.sonar.plugins.java.api.tree.ClassTree;
 import org.sonar.plugins.java.api.tree.MethodTree;
+
+import main.java.framework.api.Scope;
 
 /**
  * TODO
@@ -14,16 +15,7 @@ import org.sonar.plugins.java.api.tree.MethodTree;
 public class NumberOfMethodsVisitor extends AVisitor {
 
 	public final static String KEY = "nom";
-	private int count;
 
-	/* (non-Javadoc)
-	 * @see main.java.visitors.ADisharmonyVisitor#scanClass(org.sonar.plugins.java.api.tree.ClassTree)
-	 */
-	@Override
-	public void scanClass(ClassTree tree) {
-		count = 0;
-		scan(tree);
-	}
 
 	/* (non-Javadoc)
 	 * @see main.java.visitors.ADisharmonyVisitor#getKey()
@@ -42,13 +34,8 @@ public class NumberOfMethodsVisitor extends AVisitor {
 	}
 
 	/* (non-Javadoc)
-	 * @see main.java.visitors.ADisharmonyVisitor#getResult()
+	 * @see org.sonar.plugins.java.api.tree.BaseTreeVisitor#visitMethod(org.sonar.plugins.java.api.tree.MethodTree)
 	 */
-	@Override
-	public int getResult() {
-		return count;
-	}
-
 	@Override
 	public void visitMethod(MethodTree tree) {
 		count++;

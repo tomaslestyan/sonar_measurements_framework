@@ -2,13 +2,13 @@
  * The MIT License (MIT)
  * Copyright (c) 2016 FI MUNI
  */
-package main.java.components;
+package main.java.framework.api.components;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import main.java.visitors.Scope;
+import main.java.framework.api.Scope;
 
 /**
  * Builder class for {@link IComponent}

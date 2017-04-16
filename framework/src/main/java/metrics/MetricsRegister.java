@@ -7,6 +7,8 @@ package main.java.metrics;
 import static java.util.Arrays.asList;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +18,8 @@ import org.sonar.api.measures.Metrics;
 
 import com.google.common.collect.ImmutableMap;
 
-import main.java.visitors.AVisitor;
+import main.java.framework.api.ICommonVisitor;
+import main.java.framework.api.Language;
 import main.java.visitors.ComplexityVisitor;
 import main.java.visitors.LinesOfCodeVisitor;
 import main.java.visitors.MaxNestingVisitor;
@@ -52,18 +55,39 @@ public class MetricsRegister implements Metrics {
 			.setDomain(CoreMetrics.DOMAIN_GENERAL)
 			.create();
 
-	private static final Map<Metric<? extends Serializable> , AVisitor> metricVisitors = ImmutableMap.<Metric<? extends Serializable> , AVisitor> builder()
-			.put(LOC, new LinesOfCodeVisitor())
-			.put(NOAV, new VariableVisitor())
-			.put(CYCLO, new ComplexityVisitor())
-			.put(MAXNESTING, new MaxNestingVisitor())
+	private static final Map<Metric<? extends Serializable> , Collection<ICommonVisitor>> metricVisitors = ImmutableMap.<Metric<? extends Serializable> , Collection<ICommonVisitor>> builder()
+			.put(LOC, Arrays.asList(new LinesOfCodeVisitor()))
+			.put(NOAV, Arrays.asList(new VariableVisitor()))
+			.put(CYCLO, Arrays.asList(new ComplexityVisitor()))
+			.put(MAXNESTING, Arrays.asList(new MaxNestingVisitor()))
 			.build();
 
 	/**
 	 * @return get visitors of metrics
 	 */
-	public static final Map<Metric<? extends Serializable> , AVisitor> getMetricVisitors() {
+	public static final Map<Metric<? extends Serializable> , Collection<ICommonVisitor>> getMetricVisitors() {
 		return metricVisitors;
+	}
+
+	/**
+	 * @param metric 
+	 * @param lang 
+	 * @return get visitors of metrics
+	 */
+	public static final ICommonVisitor getMetricVisitorForLanguage(Metric<? extends Serializable> metric, Language lang) {
+		Collection<ICommonVisitor> visitors = metricVisitors.get(metric);
+		if (visitors == null) {
+			return null;
+		}
+		return visitors.stream().filter(x -> x.getLanguage().equals(lang)).findAny().orElseGet(null);
+	}
+
+	/**
+	 * @return TODO
+	 */
+	@SuppressWarnings("rawtypes")
+	public static final List<Metric> getFrameworkMetrics() {
+		return asList(LOC, NOAV, CYCLO, MAXNESTING);
 	}
 
 	/* (non-Javadoc)
@@ -72,6 +96,6 @@ public class MetricsRegister implements Metrics {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public List<Metric> getMetrics() {
-		return asList(LOC, NOAV, CYCLO, MAXNESTING);
+		return getFrameworkMetrics();
 	}
 }

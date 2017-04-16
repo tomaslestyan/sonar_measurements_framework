@@ -2,13 +2,15 @@
  * The MIT License (MIT)
  * Copyright (c) 2016 FI MUNI
  */
-package main.java.components;
+package main.java.framework.api.components;
 
 import java.util.Collection;
 import java.util.Map;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+
+import main.java.framework.api.Scope;
 
 /**
  * Custom component interface
@@ -58,6 +60,11 @@ public interface IComponent {
 	 * @return the endLine
 	 */
 	public int getEndLine();
+
+	/**
+	 * @return scope of the component e.g,  {@link MethodComponent}  = {@link Scope#METHOD}
+	 */
+	public Scope getScope();
 
 	/**
 	 * Draft of the JSon format

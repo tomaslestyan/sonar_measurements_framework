@@ -2,13 +2,13 @@
  * The MIT License (MIT)
  * Copyright (c) 2016 FI MUNI
  */
-package main.java.components;
+package main.java.framework.api.components;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-import main.java.visitors.Scope;
+import main.java.framework.api.Scope;
 
 /**
  * Class component
@@ -40,7 +40,7 @@ public class ClassComponent extends AComponent {
 	 */
 	ClassComponent(String id, String sonarComponentID, String packageName, String parentClass, String superClass, Collection<String> interfaces, Collection<IComponent> children,
 			Map<String, Integer> measures, int startLine, int endLine) {
-		super(id, sonarComponentID, parentClass, children, measures, startLine, endLine);
+		super(id, sonarComponentID, parentClass, Scope.CLASS, children, measures, startLine, endLine);
 		this.interfaces = (interfaces == null) ? Collections.emptyList() : interfaces;
 		this.superClass = superClass;
 		this.packageName = packageName;

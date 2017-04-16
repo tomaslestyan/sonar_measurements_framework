@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 import org.sonar.api.ce.measure.Component;
 import org.sonar.api.ce.measure.MeasureComputer;
 
-import main.java.components.ComponentFactory;
-import main.java.components.IComponent;
+import main.java.framework.api.components.ComponentFactory;
+import main.java.framework.api.components.IComponent;
 
 /**
  * Example framework usage.

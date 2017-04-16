@@ -2,7 +2,7 @@
  * The MIT License (MIT)
  * Copyright (c) 2016 FI MUNI
  */
-package main.java.components;
+package main.java.framework.api.components;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -11,6 +11,8 @@ import java.util.Map;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+
+import main.java.framework.api.Scope;
 
 /**
  * Abstract class for regular components (method classes)
@@ -31,7 +33,9 @@ public abstract class AComponent implements IComponent {
 	/** The starting line of the component */
 	private int startLine;
 	/** The ending line of the component */
-	private int endLine;
+	private final int endLine;
+	/** The scope of the component */
+	private final Scope scope;
 
 	/**
 	 * Constructor
@@ -42,10 +46,12 @@ public abstract class AComponent implements IComponent {
 	 * @param endLine 
 	 * @param startLine 
 	 */
-	protected AComponent(String id, String sonarComponentID, String parentClass,  Collection<IComponent> children, Map<String, Integer> measures, int startLine, int endLine) {
+	protected AComponent(String id, String sonarComponentID, String parentClass, Scope scope,  Collection<IComponent> children, 
+			Map<String, Integer> measures, int startLine, int endLine) {
 		this.id = id;
 		this.sonarComponentID = sonarComponentID;
 		this.parentClass = parentClass;
+		this.scope = scope;
 		this.measures = measures;
 		this.startLine = startLine;
 		this.endLine = endLine;
@@ -128,6 +134,14 @@ public abstract class AComponent implements IComponent {
 		result = prime * result + ((parentClass == null) ? 0 : parentClass.hashCode());
 		result = prime * result + ((sonarComponentID == null) ? 0 : sonarComponentID.hashCode());
 		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see main.java.components.IComponent#getScope()
+	 */
+	@Override
+	public Scope getScope() {
+		return scope;
 	}
 
 

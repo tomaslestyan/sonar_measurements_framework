@@ -11,10 +11,11 @@ import org.sonar.plugins.java.api.tree.DoWhileStatementTree;
 import org.sonar.plugins.java.api.tree.ForEachStatement;
 import org.sonar.plugins.java.api.tree.ForStatementTree;
 import org.sonar.plugins.java.api.tree.IfStatementTree;
-import org.sonar.plugins.java.api.tree.MethodTree;
 import org.sonar.plugins.java.api.tree.ReturnStatementTree;
 import org.sonar.plugins.java.api.tree.ThrowStatementTree;
 import org.sonar.plugins.java.api.tree.WhileStatementTree;
+
+import main.java.framework.api.Scope;
 
 //FIXME compute also conditional OR and conditonal AND
 /**
@@ -24,7 +25,6 @@ import org.sonar.plugins.java.api.tree.WhileStatementTree;
 public class ComplexityVisitor extends AVisitor {
 
 	public static final String KEY = "cyclo";
-	private int complexity = 0;
 
 	/* (non-Javadoc)
 	 * @see main.java.visitors.ADisharmonyVisitor#getID()
@@ -43,30 +43,14 @@ public class ComplexityVisitor extends AVisitor {
 	}
 
 	/* (non-Javadoc)
-	 * @see main.java.visitors.ADisharmonyVisitor#getResult()
-	 */
-	@Override
-	public int getResult() {
-		return complexity;	}
-
-	/* (non-Javadoc)
-	 * @see main.java.visitors.ADisharmonyVisitor#scanMethod(org.sonar.plugins.java.api.tree.MethodTree)
-	 */
-	@Override
-	public void scanMethod(MethodTree tree) {
-		complexity = 0;
-		scan(tree);
-	}
-
-	/* (non-Javadoc)
 	 * @see org.sonar.plugins.java.api.tree.BaseTreeVisitor#visitCaseLabel(org.sonar.plugins.java.api.tree.CaseLabelTree)
 	 */
 	@Override
 	public void visitCaseLabel(CaseLabelTree tree) {
-	     if (!"default".equals(tree.caseOrDefaultKeyword().text())) {
-	    	 complexity++;
-	        }
-	     super.visitCaseLabel(tree);
+		if (!"default".equals(tree.caseOrDefaultKeyword().text())) {
+			count++;
+		}
+		super.visitCaseLabel(tree);
 	}
 
 	/* (non-Javadoc)
@@ -74,7 +58,7 @@ public class ComplexityVisitor extends AVisitor {
 	 */
 	@Override
 	public void visitIfStatement(IfStatementTree tree) {
-		complexity++;
+		count++;
 		super.visitIfStatement(tree);
 	}
 
@@ -83,7 +67,7 @@ public class ComplexityVisitor extends AVisitor {
 	 */
 	@Override
 	public void visitForStatement(ForStatementTree tree) {
-		complexity++;
+		count++;
 		super.visitForStatement(tree);
 	}
 
@@ -92,7 +76,7 @@ public class ComplexityVisitor extends AVisitor {
 	 */
 	@Override
 	public void visitForEachStatement(ForEachStatement tree) {
-		complexity++;
+		count++;
 		super.visitForEachStatement(tree);
 	}
 
@@ -101,7 +85,7 @@ public class ComplexityVisitor extends AVisitor {
 	 */
 	@Override
 	public void visitDoWhileStatement(DoWhileStatementTree tree) {
-		complexity++;
+		count++;
 		super.visitDoWhileStatement(tree);
 	}
 
@@ -110,7 +94,7 @@ public class ComplexityVisitor extends AVisitor {
 	 */
 	@Override
 	public void visitWhileStatement(WhileStatementTree tree) {
-		complexity++;
+		count++;
 		super.visitWhileStatement(tree);
 	}
 
@@ -119,7 +103,7 @@ public class ComplexityVisitor extends AVisitor {
 	 */
 	@Override
 	public void visitReturnStatement(ReturnStatementTree tree) {
-		complexity++;
+		count++;
 		super.visitReturnStatement(tree);
 	}
 
@@ -128,7 +112,7 @@ public class ComplexityVisitor extends AVisitor {
 	 */
 	@Override
 	public void visitThrowStatement(ThrowStatementTree tree) {
-		complexity++;
+		count++;
 		super.visitThrowStatement(tree);
 	}
 
@@ -137,7 +121,7 @@ public class ComplexityVisitor extends AVisitor {
 	 */
 	@Override
 	public void visitCatch(CatchTree tree) {
-		complexity++;
+		count++;
 		super.visitCatch(tree);
 	}
 
@@ -146,7 +130,7 @@ public class ComplexityVisitor extends AVisitor {
 	 */
 	@Override
 	public void visitConditionalExpression(ConditionalExpressionTree tree) {
-		complexity++;
+		count++;
 		super.visitConditionalExpression(tree);
 	}
 }

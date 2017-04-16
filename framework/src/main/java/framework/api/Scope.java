@@ -2,7 +2,7 @@
  * The MIT License (MIT)
  * Copyright (c) 2016 FI MUNI
  */
-package main.java.visitors;
+package main.java.framework.api;
 
 /**
  * Enum of visitor scopes
@@ -27,5 +27,23 @@ public enum Scope {
 	 */
 	public int getValue() {
 		return value;
+	}
+
+	public static Scope valueOf(int value) {
+		Scope result = null;
+		switch (value) {
+		case 0:
+			result = Scope.ALL;
+			break;
+		case 1:
+			result = Scope.CLASS;
+			break;
+		case 2:
+			result = Scope.METHOD;
+			break;
+		default:
+			break;
+		}
+		return result;
 	}
 }

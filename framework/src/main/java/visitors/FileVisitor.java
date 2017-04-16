@@ -22,6 +22,9 @@ import org.sonar.plugins.java.api.tree.Tree.Kind;
 import org.sonar.plugins.java.api.tree.TypeTree;
 
 import main.java.db.SonarDbClient;
+import main.java.framework.api.ICommonVisitor;
+import main.java.framework.api.Language;
+import main.java.framework.api.Scope;
 import main.java.metrics.MetricsRegister;
 
 /**
@@ -59,7 +62,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner{
 		ListTree<TypeTree> superInterfaces = tree.superInterfaces();
 		client.saveComponent(componentID, context.getFileKey(), getParentID(tree), Scope.CLASS.getValue(), 
 				getPackageName(), getClassName(superClass), superInterfaces.stream().map(x -> getClassName(x)).collect(Collectors.toList()), line, endLine);
-		saveClassMetrics(tree, componentID);
+		saveMetrics(tree, componentID, Scope.CLASS);
 		client.disconnect();
 		super.visitClass(tree);
 	}
@@ -75,7 +78,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner{
 		client.saveComponent(componentID, context.getFileKey(), getParentID(tree), Scope.METHOD.getValue(), 
 				getPackageName(), null, Collections.emptyList(), tree.firstToken().line(), tree.lastToken().line());
 		client.disconnect();
-		saveMethodMetrics(tree, componentID);
+		saveMetrics(tree, componentID, Scope.METHOD);
 		super.visitMethod(tree);
 	}
 
@@ -93,33 +96,21 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner{
 	}
 
 	/**
-	 * Save metrics for methods
 	 * @param tree
 	 * @param componentID
 	 */
-	private void saveMethodMetrics(MethodTree tree, String componentID) {
+	@SuppressWarnings("unchecked")
+	private void saveMetrics(Tree tree, String componentID, Scope scope) {
 		SonarDbClient client = new SonarDbClient(true);
-		MetricsRegister.getMetricVisitors().entrySet().stream().filter(x -> x.getValue().getScope() == Scope.ALL || x.getValue().getScope() == Scope.METHOD).forEach(y -> {
-			AVisitor visitor = y.getValue();
-			visitor.scanMethod(tree);
-			client.saveMeasure(y.getKey(), componentID, visitor.getResult());
+		MetricsRegister.getFrameworkMetrics().forEach(x -> {
+			ICommonVisitor javaVisitor = MetricsRegister.getMetricVisitorForLanguage(x, Language.JAVA);
+			boolean isInScope = javaVisitor.getScope() == Scope.ALL || javaVisitor.getScope() == scope;
+			if ((javaVisitor != null) && javaVisitor instanceof AVisitor && isInScope) {
+				AVisitor visitor = (AVisitor) javaVisitor;
+				visitor.scanTree(tree);
+				client.saveMeasure(x, componentID, visitor.getResult());
 
-		});
-		client.disconnect();
-	}
-
-	/**
-	 * Save metrics for classes
-	 * @param tree
-	 * @param componentID
-	 */
-	private void saveClassMetrics(ClassTree tree, String componentID) {
-		SonarDbClient client = new SonarDbClient(true);
-		MetricsRegister.getMetricVisitors().entrySet().stream().filter(x -> x.getValue().getScope() == Scope.ALL || x.getValue().getScope() == Scope.CLASS).forEach(y -> {
-			AVisitor visitor = y.getValue();
-			visitor.scanClass(tree);
-			client.saveMeasure(y.getKey(), componentID, visitor.getResult());
-
+			};
 		});
 		client.disconnect();
 	}
@@ -138,6 +129,10 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner{
 		return context.getTree().packageDeclaration().packageName().firstToken().text();
 	}
 
+	/**
+	 * @param tree
+	 * @return
+	 */
 	private String getClassName(TypeTree tree) {
 		if ((tree != null) && tree.is(Kind.IDENTIFIER)) {
 			return tree.firstToken().text();

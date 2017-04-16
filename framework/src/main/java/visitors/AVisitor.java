@@ -5,27 +5,41 @@
 package main.java.visitors;
 
 import org.sonar.plugins.java.api.tree.BaseTreeVisitor;
-import org.sonar.plugins.java.api.tree.ClassTree;
-import org.sonar.plugins.java.api.tree.MethodTree;
+import org.sonar.plugins.java.api.tree.Tree;
+
+import main.java.framework.api.ICommonVisitor;
+import main.java.framework.api.Language;
 
 /**
  * Abstract visitor class
  * @author Tomas Lestyan
  */
-public abstract class AVisitor extends BaseTreeVisitor {
+public abstract class AVisitor extends BaseTreeVisitor implements ICommonVisitor {
 
-	public abstract String getKey();
+	protected int count;
 
-	public abstract Scope getScope();
-
-	public abstract int getResult();
-
-	public void scanMethod(MethodTree tree){
-		throw new UnsupportedOperationException("Scanning methods with this visitor is not supported");
+	/* (non-Javadoc)
+	 * @see main.java.framework.api.ICommonVisitor#getLanguage()
+	 */
+	@Override
+	public Language getLanguage() {
+		return Language.JAVA;
 	}
 
-	public void scanClass(ClassTree tree) {
-		throw new UnsupportedOperationException("Scanning classes with this visitor is not supported");
+	/**
+	 * TODO
+	 * @param tree
+	 */
+	public void scanTree(Tree tree) {
+		count = 0;
+		super.scan(tree);
 	}
 
+	/* (non-Javadoc)
+	 * @see main.java.framework.api.ICommonVisitor#getResult()
+	 */
+	@Override
+	public int getResult() {
+		return count;
+	}
 }

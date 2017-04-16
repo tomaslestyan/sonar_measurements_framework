@@ -30,6 +30,7 @@ public class MeasurementsPlugin implements Plugin {
 		SonarDbClient client = new SonarDbClient(true);
 		//		client.dropTables(); //DEBUG ONLY
 		client.createTables();
+		client.storeMeasures();
 		client.disconnect();
 	}
 
