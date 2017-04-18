@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
@@ -242,7 +243,7 @@ public class SonarDbClient {
 		String interfaces = queryResult.getString("interfaces");
 		int start = queryResult.getInt("STARTLINE");
 		int end = queryResult.getInt("ENDLINE");
-		Map<String, Integer> measures = getMeasures(id);
+		Map<String, Integer> measures = getRecentMeasures(id);
 		if (type.equalsIgnoreCase("2")) {
 			return MethodComponent.builder()
 					.setId(id)
@@ -271,11 +272,11 @@ public class SonarDbClient {
 	}
 
 	/**
-	 * Get measures for given component
+	 * Get recent measures (from last scan) for given component
 	 * @param id if of the component
 	 * @return measures
 	 */
-	private Map<String, Integer> getMeasures(String id) {
+	private Map<String, Integer> getRecentMeasures(String id) {
 		// check connection
 		if (!isConnectionValid()) {
 			return null;
@@ -291,7 +292,32 @@ public class SonarDbClient {
 			queryResult.close();
 			return measures;
 		} catch (SQLException e) {
-			log.warn("Can't retrieve components", e);
+			log.warn("Can't retrieve recent measures", e);
+		}
+		return null;
+	}
+
+	/**
+	 * Get measures for given component
+	 * @param metric if of the component
+	 * @return measures
+	 */
+	public List<Integer> getMeasures(String metric) {
+		// check connection
+		if (!isConnectionValid()) {
+			return null;
+		}
+		try (Statement st = connection.createStatement()) {
+			List<Integer> measures = new ArrayList<>();
+			ResultSet queryResult = st.executeQuery(String.format("SELECT * FROM Measures WHERE Metricsid = '%s' ", metric));
+			while (queryResult.next()) {
+				int value = queryResult.getInt("value");
+				measures.add( Integer.valueOf(value));
+			}
+			queryResult.close();
+			return measures;
+		} catch (SQLException e) {
+			log.warn("Can't retrieve measures", e);
 		}
 		return null;
 	}

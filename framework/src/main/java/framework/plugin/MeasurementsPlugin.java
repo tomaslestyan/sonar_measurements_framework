@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.sonar.api.Plugin;
 
 import main.java.db.SonarDbClient;
-import main.java.metrics.MetricsRegister;
+import main.java.framework.api.metrics.MetricsRegister;
 
 /**
  * The plugin definition

@@ -30,7 +30,7 @@ public class LinesOfCodeVisitor extends AVisitor {
 	 */
 	@Override
 	public Scope getScope() {
-		return Scope.ALL;
+		return Scope.METHOD;
 	}
 
 	/* (non-Javadoc)

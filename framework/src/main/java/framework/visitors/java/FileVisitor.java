@@ -25,7 +25,7 @@ import main.java.db.SonarDbClient;
 import main.java.framework.api.ICommonVisitor;
 import main.java.framework.api.Language;
 import main.java.framework.api.Scope;
-import main.java.metrics.MetricsRegister;
+import main.java.framework.api.metrics.MetricsRegister;
 
 /**
  * Class for visiting Java files. The purpose of the class is to visit each class and method and store information about this components including measures of available metrics.
