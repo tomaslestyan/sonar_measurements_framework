@@ -2,7 +2,7 @@
  * The MIT License (MIT)
  * Copyright (c) 2016 FI MUNI
  */
-package main.java.db;
+package main.java.framework.db;
 
 import java.io.Serializable;
 import java.sql.Connection;

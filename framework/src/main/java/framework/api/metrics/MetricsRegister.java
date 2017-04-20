@@ -20,11 +20,11 @@ import com.google.common.collect.ImmutableMap;
 
 import main.java.framework.api.ICommonVisitor;
 import main.java.framework.api.Language;
-import main.java.visitors.ClassLinesOfCodeVisitor;
-import main.java.visitors.ComplexityVisitor;
-import main.java.visitors.LinesOfCodeVisitor;
-import main.java.visitors.MaxNestingVisitor;
-import main.java.visitors.VariableVisitor;
+import main.java.framework.visitors.java.ClassLinesOfCodeVisitor;
+import main.java.framework.visitors.java.ComplexityVisitor;
+import main.java.framework.visitors.java.LinesOfCodeVisitor;
+import main.java.framework.visitors.java.MaxNestingVisitor;
+import main.java.framework.visitors.java.VariableVisitor;
 
 /**
  * Class for register metrics. It registers metric for SonarQube but mainly it just connects the metrics with their visitors.

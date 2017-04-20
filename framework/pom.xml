@@ -159,12 +159,12 @@
 				<extensions>true</extensions>
 				<configuration>
 					<pluginKey>framework</pluginKey>
-					<pluginClass>main.java.plugin.MeasurementsPlugin</pluginClass>
+					<pluginClass>main.java.framework.plugin.MeasurementsPlugin</pluginClass>
 					<downloadSources>true</downloadSources>
 					<downloadJavadocs>true</downloadJavadocs>
 					<sonarLintSupported>true</sonarLintSupported>
-					<sonarQubeMinVersion>5.6</sonarQubeMinVersion>
-					<pluginDescription>TODO</pluginDescription>
+					<sonarQubeMinVersion>6.3</sonarQubeMinVersion>
+					<pluginDescription>Measurement Framework - uses visitors to measure various attributes of scanned code</pluginDescription>
 				</configuration>
 			</plugin>
 			<plugin>

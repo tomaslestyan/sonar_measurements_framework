@@ -2,14 +2,14 @@
  * The MIT License (MIT)
  * Copyright (c) 2016 FI MUNI
  */
-package main.java.plugin;
+package main.java.framework.plugin;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.Plugin;
 
-import main.java.db.SonarDbClient;
 import main.java.framework.api.metrics.MetricsRegister;
+import main.java.framework.db.SonarDbClient;
 
 /**
  * The plugin definition

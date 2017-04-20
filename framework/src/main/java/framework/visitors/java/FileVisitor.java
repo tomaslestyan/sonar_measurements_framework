@@ -2,7 +2,7 @@
  * The MIT License (MIT)
  * Copyright (c) 2016 FI MUNI
  */
-package main.java.visitors;
+package main.java.framework.visitors.java;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,11 +21,11 @@ import org.sonar.plugins.java.api.tree.Tree;
 import org.sonar.plugins.java.api.tree.Tree.Kind;
 import org.sonar.plugins.java.api.tree.TypeTree;
 
-import main.java.db.SonarDbClient;
 import main.java.framework.api.ICommonVisitor;
 import main.java.framework.api.Language;
 import main.java.framework.api.Scope;
 import main.java.framework.api.metrics.MetricsRegister;
+import main.java.framework.db.SonarDbClient;
 
 /**
  * Class for visiting Java files. The purpose of the class is to visit each class and method and store information about this components including measures of available metrics.

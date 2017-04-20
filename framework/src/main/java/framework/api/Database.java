@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import main.java.db.SonarDbClient;
 import main.java.framework.api.components.ClassComponent;
 import main.java.framework.api.components.IComponent;
+import main.java.framework.db.SonarDbClient;
 
 /**
  * Class for retrieving information from Sonar DB
