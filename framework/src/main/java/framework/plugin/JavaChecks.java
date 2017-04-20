@@ -2,7 +2,7 @@
  * The MIT License (MIT)
  * Copyright (c) 2016 FI MUNI
  */
-package main.java.plugin;
+package main.java.framework.plugin;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,7 +10,7 @@ import java.util.Collections;
 import org.sonar.plugins.java.api.CheckRegistrar;
 import org.sonar.plugins.java.api.JavaCheck;
 
-import main.java.visitors.FileVisitor;
+import main.java.framework.visitors.java.FileVisitor;
 
 /**
  * Check for SonarQube

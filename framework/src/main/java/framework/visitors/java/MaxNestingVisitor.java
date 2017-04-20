@@ -1,11 +1,13 @@
 /**
  *
  */
-package main.java.visitors;
+package main.java.framework.visitors.java;
 
 import org.sonar.plugins.java.api.tree.BlockTree;
 import org.sonar.plugins.java.api.tree.MethodTree;
 import org.sonar.plugins.java.api.tree.Tree;
+
+import main.java.framework.api.Scope;
 
 /**
  * Max nesting visitor
@@ -14,8 +16,6 @@ import org.sonar.plugins.java.api.tree.Tree;
 public class MaxNestingVisitor extends AVisitor {
 
 	public static final String KEY = "maxnesting";
-	public static final int ID = 3;
-	private int maxValue;
 
 	/* (non-Javadoc)
 	 * @see main.java.visitors.ADisharmonyVisitor#getID()
@@ -34,15 +34,6 @@ public class MaxNestingVisitor extends AVisitor {
 	}
 
 	/* (non-Javadoc)
-	 * @see main.java.visitors.ADisharmonyVisitor#scanMethod(org.sonar.plugins.java.api.tree.MethodTree)
-	 */
-	@Override
-	public void scanMethod(MethodTree tree) {
-		maxValue = 0;
-		super.scan(tree);
-	}
-
-	/* (non-Javadoc)
 	 * @see org.sonar.plugins.java.api.tree.BaseTreeVisitor#visitBlock(org.sonar.plugins.java.api.tree.BlockTree)
 	 */
 	@Override
@@ -50,21 +41,13 @@ public class MaxNestingVisitor extends AVisitor {
 		int nesting = 0;
 		Tree parent = tree;
 		while (!(parent instanceof MethodTree)) {
-				nesting++;
-				parent = parent.parent();
+			nesting++;
+			parent = parent.parent();
 		}
-		if (nesting > maxValue) {
-			maxValue = nesting;
+		if (nesting > count) {
+			count = nesting;
 		}
 		super.visitBlock(tree);
-	}
-
-	/* (non-Javadoc)
-	 * @see main.java.visitors.ADisharmonyVisitor#getResult()
-	 */
-	@Override
-	public int getResult() {
-		return maxValue;
 	}
 
 }

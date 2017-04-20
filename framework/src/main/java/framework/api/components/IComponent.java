@@ -2,13 +2,15 @@
  * The MIT License (MIT)
  * Copyright (c) 2016 FI MUNI
  */
-package main.java.components;
+package main.java.framework.api.components;
 
 import java.util.Collection;
 import java.util.Map;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+
+import main.java.framework.api.Scope;
 
 /**
  * Custom component interface
@@ -40,14 +42,29 @@ public interface IComponent {
 	 * @return the measures of the component (key: metric, value: measure for the metric)
 	 * FIXME <Object, Object> is only for evaluation purpose, should be changed into something reasonable
 	 */
-	Map<Object, Object> getMeasures();
+	Map<String, Integer> getMeasures();
 
 	/**
 	 * Add an additional derived measure. This measure is computed on the side of the host plugin and its value will be not stored in Sonar DB
 	 * @param metricID
 	 * @param value
 	 */
-	void addComplexMeasure(Object metricID, Object value);
+	void addComplexMeasure(String metricID, Integer value);
+
+	/**
+	 * @return the startLine
+	 */
+	public int getStartLine();
+
+	/**
+	 * @return the endLine
+	 */
+	public int getEndLine();
+
+	/**
+	 * @return scope of the component e.g,  {@link MethodComponent}  = {@link Scope#METHOD}
+	 */
+	public Scope getScope();
 
 	/**
 	 * Draft of the JSon format

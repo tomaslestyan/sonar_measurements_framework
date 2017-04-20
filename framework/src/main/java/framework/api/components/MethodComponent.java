@@ -2,11 +2,11 @@
  * The MIT License (MIT)
  * Copyright (c) 2016 FI MUNI
  */
-package main.java.components;
+package main.java.framework.api.components;
 
 import java.util.Map;
 
-import main.java.visitors.Scope;
+import main.java.framework.api.Scope;
 
 /**
  * Method component
@@ -24,8 +24,8 @@ public class MethodComponent extends AComponent {
 	 * @param endLine 
 	 * @param startLine 
 	 */
-	MethodComponent(String id, String sonarComponentID, String parentClass, Map<Object, Object> measures, int startLine, int endLine) {
-		super(id, sonarComponentID, parentClass, null, measures, startLine, endLine);
+	MethodComponent(String id, String sonarComponentID, String parentClass, Map<String, Integer> measures, int startLine, int endLine) {
+		super(id, sonarComponentID, parentClass, Scope.METHOD, null, measures, startLine, endLine);
 	}
 
 	/**

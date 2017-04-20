@@ -2,7 +2,7 @@
  * The MIT License (MIT)
  * Copyright (c) 2016 FI MUNI
  */
-package main.java.components;
+package main.java.framework.api.components;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -11,6 +11,8 @@ import java.util.Map;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+
+import main.java.framework.api.Scope;
 
 /**
  * Abstract class for regular components (method classes)
@@ -27,11 +29,13 @@ public abstract class AComponent implements IComponent {
 	/** Collection of child components, e.g., nested classes, anonymous classes or methods  */
 	private Collection<IComponent> children;
 	/** Measures of the component (key: metric, value: measure for the metric)  */
-	private Map<Object, Object> measures = new HashMap<>(); // FIXME <Object, Object> is only for evaluation purpose, should be changed into something reasonable
+	private Map<String, Integer> measures = new HashMap<>();
 	/** The starting line of the component */
 	private int startLine;
 	/** The ending line of the component */
-	private int endLine;
+	private final int endLine;
+	/** The scope of the component */
+	private final Scope scope;
 
 	/**
 	 * Constructor
@@ -42,10 +46,12 @@ public abstract class AComponent implements IComponent {
 	 * @param endLine 
 	 * @param startLine 
 	 */
-	protected AComponent(String id, String sonarComponentID, String parentClass,  Collection<IComponent> children, Map<Object, Object> measures, int startLine, int endLine) {
+	protected AComponent(String id, String sonarComponentID, String parentClass, Scope scope,  Collection<IComponent> children, 
+			Map<String, Integer> measures, int startLine, int endLine) {
 		this.id = id;
 		this.sonarComponentID = sonarComponentID;
 		this.parentClass = parentClass;
+		this.scope = scope;
 		this.measures = measures;
 		this.startLine = startLine;
 		this.endLine = endLine;
@@ -88,7 +94,7 @@ public abstract class AComponent implements IComponent {
 	 * @see main.java.components.IComponent#getMeasures()
 	 */
 	@Override
-	public Map<Object, Object> getMeasures() {
+	public Map<String, Integer> getMeasures() {
 		return measures;
 	}
 
@@ -96,20 +102,22 @@ public abstract class AComponent implements IComponent {
 	 * @see main.java.components.IComponent#addComplexMeasure(java.lang.Object, java.lang.Object)
 	 */
 	@Override
-	public void addComplexMeasure(Object metricID, Object value) {
+	public void addComplexMeasure(String metricID, Integer value) {
 		measures.put(metricID, value);
 	}
 
-	/**
-	 * @return the startLine
+	/* (non-Javadoc)
+	 * @see main.java.components.IComponent#getStartLine()
 	 */
+	@Override
 	public int getStartLine() {
 		return startLine;
 	}
 
-	/**
-	 * @return the endLine
+	/* (non-Javadoc)
+	 * @see main.java.components.IComponent#getEndLine()
 	 */
+	@Override
 	public int getEndLine() {
 		return endLine;
 	}
@@ -126,6 +134,14 @@ public abstract class AComponent implements IComponent {
 		result = prime * result + ((parentClass == null) ? 0 : parentClass.hashCode());
 		result = prime * result + ((sonarComponentID == null) ? 0 : sonarComponentID.hashCode());
 		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see main.java.components.IComponent#getScope()
+	 */
+	@Override
+	public Scope getScope() {
+		return scope;
 	}
 
 
