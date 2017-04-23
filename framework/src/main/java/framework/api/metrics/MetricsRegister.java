@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import main.java.framework.visitors.java.NumberOfAttributesVisitor;
 import org.sonar.api.measures.CoreMetrics;
 import org.sonar.api.measures.Metric;
 import org.sonar.api.measures.Metrics;
@@ -62,12 +63,19 @@ public class MetricsRegister implements Metrics {
 			.setDomain(CoreMetrics.DOMAIN_GENERAL)
 			.create();
 
+	public static final Metric<Integer> NOA = new Metric.Builder("noa", "noa", Metric.ValueType.INT)
+			.setDescription("Number of attributes for the class")
+			.setQualitative(false)
+			.setDomain(CoreMetrics.DOMAIN_GENERAL)
+			.create();
+
 	private static final Map<Metric<? extends Serializable> , Collection<ICommonVisitor>> metricVisitors = ImmutableMap.<Metric<? extends Serializable> , Collection<ICommonVisitor>> builder()
 			.put(LOC, Arrays.asList(new LinesOfCodeVisitor()))
 			.put(LOC_CLASS, Arrays.asList(new ClassLinesOfCodeVisitor()))
 			.put(NOAV, Arrays.asList(new VariableVisitor()))
 			.put(CYCLO, Arrays.asList(new ComplexityVisitor()))
 			.put(MAXNESTING, Arrays.asList(new MaxNestingVisitor()))
+			.put(NOA, Arrays.asList(new NumberOfAttributesVisitor()))
 			.build();
 
 	/**
@@ -94,7 +102,7 @@ public class MetricsRegister implements Metrics {
 	 * @return TODO
 	 */
 	public static final List<Metric> getFrameworkMetrics() {
-		return asList(LOC, LOC_CLASS, NOAV, CYCLO, MAXNESTING);
+		return asList(LOC, LOC_CLASS, NOAV, CYCLO, MAXNESTING, NOA);
 	}
 
 	/* (non-Javadoc)
