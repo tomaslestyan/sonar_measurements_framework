@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.sonar.plugins.java.api.JavaFileScannerContext;
+
 import main.java.framework.api.Scope;
 
 /**
@@ -20,8 +22,10 @@ public class Builder {
 	private Scope type;
 	/** Unique ID of the component*/
 	private String id;
-	/** ID of the sonar FILE component */
+	/** ID of the sonar PROJECT component */
 	private String sonarComponentID;
+	/** Key of the owner file */
+	private String fileKey;
 	/** The parent class of the component (not super class nor interface) in which it is located, null for regular classes */
 	private String parentClass;
 	/** Collection of child components, e.g., nested classes, anonymous classes or methods  */
@@ -57,11 +61,20 @@ public class Builder {
 	}
 
 	/**
-	 * @param sonarComponentID the sonarComponentID to set
+	 * @param sonarComponentID the sonarQube Project ID to set
 	 * @return the instance of the builder
 	 */
-	public Builder setSonarComponentID(String sonarComponentID) {
+	public Builder setSonarProjectID(String sonarComponentID) {
 		this.sonarComponentID = sonarComponentID;
+		return this;
+	}
+
+	/**
+	 * @param fileKey the key of the file of the component as specified in {@link JavaFileScannerContext#getFileKey()}
+	 * @return the instance of the builder
+	 */
+	public Builder setFileKey(String fileKey) {
+		this.fileKey = fileKey;
 		return this;
 	}
 
@@ -145,11 +158,11 @@ public class Builder {
 		switch (type) {
 		case METHOD:
 			// TODO check required parameters
-			component =new MethodComponent(id, sonarComponentID, parentClass, measures, startLine, endLine);
+			component =new MethodComponent(id, sonarComponentID, fileKey, parentClass, measures, startLine, endLine);
 			break;
 		case CLASS:
 			// TODO check required parameters
-			component =new ClassComponent(id, sonarComponentID, packageName, parentClass, superClass, interfaces, children, measures, startLine, endLine);
+			component =new ClassComponent(id, sonarComponentID, fileKey, packageName, parentClass, superClass, interfaces, children, measures, startLine, endLine);
 			break;
 		default:
 			component = null;

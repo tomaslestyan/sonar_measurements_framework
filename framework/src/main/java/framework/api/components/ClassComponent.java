@@ -38,9 +38,9 @@ public class ClassComponent extends AComponent {
 	 * @param endLine 
 	 * @param startLine 
 	 */
-	ClassComponent(String id, String sonarComponentID, String packageName, String parentClass, String superClass, Collection<String> interfaces, Collection<IComponent> children,
+	ClassComponent(String id, String sonarComponentID, String fileKey, String packageName, String parentClass, String superClass, Collection<String> interfaces, Collection<IComponent> children,
 			Map<String, Integer> measures, int startLine, int endLine) {
-		super(id, sonarComponentID, parentClass, Scope.CLASS, children, measures, startLine, endLine);
+		super(id, sonarComponentID, fileKey, parentClass, Scope.CLASS, children, measures, startLine, endLine);
 		this.interfaces = (interfaces == null) ? Collections.emptyList() : interfaces;
 		this.superClass = superClass;
 		this.packageName = packageName;
