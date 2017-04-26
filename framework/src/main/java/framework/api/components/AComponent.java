@@ -22,8 +22,10 @@ public abstract class AComponent implements IComponent {
 
 	/** Unique ID of the component*/
 	private String id;
-	/** ID of the sonar FILE component */
+	/** ID of the sonar PROJECT component */
 	private String sonarComponentID;
+	/** Key of the owner file */
+	private String fileKey;
 	/** The parent class of the component (not super class nor interface) in which it is located, null for regular classes */
 	private String parentClass;
 	/** Collection of child components, e.g., nested classes, anonymous classes or methods  */
@@ -46,10 +48,11 @@ public abstract class AComponent implements IComponent {
 	 * @param endLine 
 	 * @param startLine 
 	 */
-	protected AComponent(String id, String sonarComponentID, String parentClass, Scope scope,  Collection<IComponent> children, 
-			Map<String, Integer> measures, int startLine, int endLine) {
+	protected AComponent(String id, String sonarComponentID, String fileKey, String parentClass, Scope scope, 
+			Collection<IComponent> children, Map<String, Integer> measures, int startLine, int endLine) {
 		this.id = id;
 		this.sonarComponentID = sonarComponentID;
+		this.fileKey = fileKey;
 		this.parentClass = parentClass;
 		this.scope = scope;
 		this.measures = measures;
@@ -62,8 +65,16 @@ public abstract class AComponent implements IComponent {
 	 * @see main.java.components.IComponent#getSonarComponentID()
 	 */
 	@Override
-	public String getSonarComponentID() {
+	public String getSonarProjectID() {
 		return sonarComponentID;
+	}
+
+	/* (non-Javadoc)
+	 * @see main.java.framework.api.components.IComponent#getFileKey()
+	 */
+	@Override
+	public String getFileKey() {
+		return fileKey;
 	}
 
 	/* (non-Javadoc)
