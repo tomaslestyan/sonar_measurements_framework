@@ -98,8 +98,8 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		SonarDbClient client = new SonarDbClient(true);
 		String componentID = context.getFileKey() + "->" + tree.simpleName().name();
 		getParentID(tree);
-		client.saveComponent(componentID, context.getFileKey(), getParentID(tree), Scope.METHOD.getValue(), 
-				getPackageName(), null, Collections.emptyList(), tree.firstToken().line(), tree.lastToken().line());
+		client.saveComponent(componentID, context.getFileKey(), project, getParentID(tree), 
+				Scope.METHOD.getValue(), getPackageName(), null, Collections.emptyList(), tree.firstToken().line(), tree.lastToken().line());
 		client.disconnect();
 		saveMetrics(tree, componentID, Scope.METHOD);
 		super.visitMethod(tree);
