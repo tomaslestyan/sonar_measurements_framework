@@ -174,7 +174,7 @@ public class SonarDbClient {
 		if (!isConnectionValid()) {
 			return;
 		}
-		log.info("FRAMEWOR: saving component" + sonarComponentID);
+		log.info("FRAMEWOR: saving component" + id);
 		StringJoiner iterfaceJoiner = new StringJoiner(",");
 		interfaces.forEach(x -> iterfaceJoiner.add(x));
 		try (Statement st = connection.createStatement()) { 
