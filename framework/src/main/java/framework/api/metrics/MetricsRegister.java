@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import main.java.framework.visitors.java.NumberOfAttributesVisitor;
 import org.sonar.api.measures.CoreMetrics;
 import org.sonar.api.measures.Metric;
 import org.sonar.api.measures.Metrics;
@@ -23,8 +22,12 @@ import main.java.framework.api.ICommonVisitor;
 import main.java.framework.api.Language;
 import main.java.framework.visitors.java.ClassLinesOfCodeVisitor;
 import main.java.framework.visitors.java.ComplexityVisitor;
+import main.java.framework.visitors.java.DataAccessVisitor;
+import main.java.framework.visitors.java.ForeignDataProvidersVisitor;
 import main.java.framework.visitors.java.LinesOfCodeVisitor;
+import main.java.framework.visitors.java.LocalityOfAttributesVisitor;
 import main.java.framework.visitors.java.MaxNestingVisitor;
+import main.java.framework.visitors.java.NumberOfAttributesVisitor;
 import main.java.framework.visitors.java.VariableVisitor;
 
 /**
@@ -69,6 +72,22 @@ public class MetricsRegister implements Metrics {
 			.setDomain(CoreMetrics.DOMAIN_GENERAL)
 			.create();
 
+	public static final Metric<Integer> ATFD = new Metric.Builder("atfd", "atfd", Metric.ValueType.INT)
+			.setDescription("Access To Foreign Data")
+			.setQualitative(false)
+			.setDomain(CoreMetrics.DOMAIN_GENERAL)
+			.create();
+	public static final Metric<Integer> LAA = new Metric.Builder("laa", "laa", Metric.ValueType.INT)
+			.setDescription("Locality of Attribute Accesses")
+			.setQualitative(false)
+			.setDomain(CoreMetrics.DOMAIN_GENERAL)
+			.create();
+	public static final Metric<Integer> FDP = new Metric.Builder("fdp", "fdp", Metric.ValueType.INT)
+			.setDescription("Foreign Data Providers")
+			.setQualitative(false)
+			.setDomain(CoreMetrics.DOMAIN_GENERAL)
+			.create();
+
 	private static final Map<Metric<? extends Serializable> , Collection<ICommonVisitor>> metricVisitors = ImmutableMap.<Metric<? extends Serializable> , Collection<ICommonVisitor>> builder()
 			.put(LOC, Arrays.asList(new LinesOfCodeVisitor()))
 			.put(LOC_CLASS, Arrays.asList(new ClassLinesOfCodeVisitor()))
@@ -76,6 +95,9 @@ public class MetricsRegister implements Metrics {
 			.put(CYCLO, Arrays.asList(new ComplexityVisitor()))
 			.put(MAXNESTING, Arrays.asList(new MaxNestingVisitor()))
 			.put(NOA, Arrays.asList(new NumberOfAttributesVisitor()))
+			.put(ATFD, Arrays.asList(new DataAccessVisitor(true)))
+			.put(LAA, Arrays.asList(new LocalityOfAttributesVisitor()))
+			.put(FDP, Arrays.asList(new ForeignDataProvidersVisitor()))
 			.build();
 
 	/**
@@ -102,7 +124,7 @@ public class MetricsRegister implements Metrics {
 	 * @return TODO
 	 */
 	public static final List<Metric> getFrameworkMetrics() {
-		return asList(LOC, LOC_CLASS, NOAV, CYCLO, MAXNESTING, NOA);
+		return asList(LOC, LOC_CLASS, NOAV, CYCLO, MAXNESTING, NOA, LAA, ATFD, FDP);
 	}
 
 	/* (non-Javadoc)

@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.reflect.FieldUtils;
 import org.sonar.api.batch.Phase;
 import org.sonar.check.Rule;
 import org.sonar.plugins.java.api.JavaFileScanner;
@@ -33,10 +34,11 @@ import main.java.framework.db.SonarDbClient;
  */
 @Phase(name = Phase.Name.PRE)
 @Rule(key = "framework", name="framework", description="blank rule")
-public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner{
+public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 
 	/** The scanner context */
 	private JavaFileScannerContext context;
+	private String project;
 
 	/* (non-Javadoc)
 	 * @see org.sonar.plugins.java.api.JavaFileScanner#scanFile(org.sonar.plugins.java.api.JavaFileScannerContext)
@@ -45,7 +47,28 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner{
 	public void scanFile(JavaFileScannerContext context) {
 		this.context = context;
 		CompilationUnitTree tree = context.getTree();
+		project = getProjectKey();
 		scan(tree);
+	}
+
+	/**
+	 * @param context
+	 * @return 
+	 */
+	private String getProjectKey() {
+		try {
+			Object sonarComponentsField = FieldUtils.readField(context, "sonarComponents", true);
+			if (sonarComponentsField != null) {
+				Object fileSystem = FieldUtils.readField(sonarComponentsField, "fs", true);
+				if (fileSystem != null) {
+					Object moduleKey = FieldUtils.readField(fileSystem, "moduleKey", true);
+					return moduleKey.toString();
+				}
+			}
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	/* (non-Javadoc)
@@ -60,8 +83,8 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner{
 		String componentID = context.getFileKey() + "->" + tree.simpleName().name();
 		TypeTree superClass = tree.superClass();
 		ListTree<TypeTree> superInterfaces = tree.superInterfaces();
-		client.saveComponent(componentID, context.getFileKey(), getParentID(tree), Scope.CLASS.getValue(), 
-				getPackageName(), getClassName(superClass), superInterfaces.stream().map(x -> getClassName(x)).collect(Collectors.toList()), line, endLine);
+		client.saveComponent(componentID, context.getFileKey(), project, getParentID(tree), 
+				Scope.CLASS.getValue(), getPackageName(), getClassName(superClass), superInterfaces.stream().map(x -> getClassName(x)).collect(Collectors.toList()), line, endLine);
 		saveMetrics(tree, componentID, Scope.CLASS);
 		client.disconnect();
 		super.visitClass(tree);
@@ -75,8 +98,8 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner{
 		SonarDbClient client = new SonarDbClient(true);
 		String componentID = context.getFileKey() + "->" + tree.simpleName().name();
 		getParentID(tree);
-		client.saveComponent(componentID, context.getFileKey(), getParentID(tree), Scope.METHOD.getValue(), 
-				getPackageName(), null, Collections.emptyList(), tree.firstToken().line(), tree.lastToken().line());
+		client.saveComponent(componentID, context.getFileKey(), project, getParentID(tree), 
+				Scope.METHOD.getValue(), getPackageName(), null, Collections.emptyList(), tree.firstToken().line(), tree.lastToken().line());
 		client.disconnect();
 		saveMetrics(tree, componentID, Scope.METHOD);
 		super.visitMethod(tree);

@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.sonar.plugins.java.api.JavaFileScannerContext;
 
 import main.java.framework.api.Scope;
 
@@ -19,9 +20,14 @@ import main.java.framework.api.Scope;
 public interface IComponent {
 
 	/**
-	 * @return ID of the sonar FILE component
+	 * @return ID of the sonar PROJECT component
 	 */
-	String getSonarComponentID();
+	String getSonarProjectID();
+
+	/**
+	 * @return Key of the file of the component as specified in {@link JavaFileScannerContext#getFileKey()}
+	 */
+	String getFileKey();
 
 	/**
 	 * @return the unique ID of the component
