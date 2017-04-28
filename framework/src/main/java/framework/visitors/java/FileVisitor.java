@@ -59,9 +59,9 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		try {
 			Object sonarComponentsField = FieldUtils.readField(context, "sonarComponents", true);
 			if (sonarComponentsField != null) {
-				Object fs = FieldUtils.readField(sonarComponentsField, "fs", true);
-				if (fs != null) {
-					Object moduleKey = FieldUtils.readField(fs, "moduleKey", true);
+				Object fileSystem = FieldUtils.readField(sonarComponentsField, "fs", true);
+				if (fileSystem != null) {
+					Object moduleKey = FieldUtils.readField(fileSystem, "moduleKey", true);
 					return moduleKey.toString();
 				}
 			}
