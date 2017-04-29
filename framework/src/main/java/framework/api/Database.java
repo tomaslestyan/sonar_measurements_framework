@@ -37,8 +37,11 @@ public class Database {
 	/**
 	 * @return collection of Class components, null if connection failed (check the log in that case)
 	 */
-	public static Collection<IComponent> getClassComponents() {
-		return getComponents().stream().filter(x -> x instanceof ClassComponent).collect(Collectors.toList());
+	public static Collection<ClassComponent> getClassComponents() {
+		SonarDbClient client = new SonarDbClient(true);
+		Collection<ClassComponent> components = client.getRootClasses();
+		client.disconnect();
+		return components;
 	}
 
 	/**

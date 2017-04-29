@@ -230,6 +230,7 @@ public class SonarDbClient {
 		return components;
 	}
 
+
 	/**
 	 * Parse component from query result
 	 * @param queryResult
@@ -350,4 +351,87 @@ public class SonarDbClient {
 		disconnect();
 		super.finalize();
 	}
+
+	/** Get classes from components table in embedded DB.
+	 * @return collections of components
+	 */
+	public Collection<ClassComponent> getRootClasses() {
+		// check connection
+		if (!isConnectionValid()) {
+			return Collections.emptyList();
+		}
+		Collection<ClassComponent> components = new ArrayList<>();
+		try (Statement st = connection.createStatement()) {
+			ResultSet queryResult = st.executeQuery("SELECT * FROM Measurement_Framework_Components WHERE superclass = \'null\' and TYPE = 1");
+			while (queryResult.next()) {
+				ClassComponent component = parseClassFromQuery(queryResult);
+				if (component != null) {
+					components.add(component);
+				}
+			}
+			queryResult.close();
+		} catch (SQLException e) {
+			log.warn("Can't retrieve components", e);
+		}
+		return components;
+	}
+
+	/**
+	 * Parse class from query result
+	 * @param queryResult
+	 * @throws SQLException
+	 */
+	private ClassComponent parseClassFromQuery(ResultSet queryResult) throws SQLException {
+		String type = queryResult.getString("TYPE");
+		String id = queryResult.getString("ID");
+		String sonarKey = queryResult.getString("projectKey");
+		String fileKey = queryResult.getString("fileKey");
+		String parentID = queryResult.getString("parent");
+		String packageName = queryResult.getString("package");
+		String superclass = queryResult.getString("superclass");
+		String interfaces = queryResult.getString("interfaces");
+		int start = queryResult.getInt("STARTLINE");
+		int end = queryResult.getInt("ENDLINE");
+		Map<String, Integer> measures = getRecentMeasures(id);
+
+		return (ClassComponent) ClassComponent.builder()
+				.setId(id)
+				.setSonarProjectID(sonarKey)
+				.setFileKey(fileKey)
+				.setParentClass(parentID)
+				.setMeasures(measures)
+				.setChildrenClasses(getClassesForParent(id))
+				.setPackageName(packageName)
+				.setSuperClass(superclass)
+				.setInterfaces(Lists.newArrayList(Splitter.on(",").split(interfaces)))
+				.setStartLine(start)
+				.setEndLine(end)
+				.build();
+	}
+
+	/** Get components from components table in embedded DB.
+	 * @param parent the parent component, for all components it should be <code>null</code>
+	 * @return collections of components
+	 */
+	public Collection<ClassComponent> getClassesForParent(String parent) {
+		// check connection
+		if (!isConnectionValid()) {
+			return Collections.emptyList();
+		}
+		Collection<ClassComponent> components = new ArrayList<>();
+		try (Statement st = connection.createStatement()) {
+			ResultSet queryResult = st.executeQuery("SELECT * FROM Measurement_Framework_Components WHERE parent = '%s' AND type = 1");
+			while (queryResult.next()) {
+				ClassComponent component = parseClassFromQuery(queryResult);
+				if (component != null) {
+					components.add(component);
+				}
+			}
+			queryResult.close();
+		} catch (SQLException e) {
+			log.warn("Can't retrieve components", e);
+		}
+		return components;
+	}
+
 }
