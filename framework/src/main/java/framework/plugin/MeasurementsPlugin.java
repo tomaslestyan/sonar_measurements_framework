@@ -27,10 +27,10 @@ public class MeasurementsPlugin implements Plugin {
 	public MeasurementsPlugin() {
 		log.info("plugin created");
 		// create tables if runs first time
-		SonarDbClient client = new SonarDbClient(true);
+		SonarDbClient client = SonarDbClient.INSTANCE;
 		//		client.dropTables(); //DEBUG ONLY
 		client.createTables();
-		client.storeMeasures();
+		client.saveRecentMeasuresToMeasures();
 		client.disconnect();
 	}
 

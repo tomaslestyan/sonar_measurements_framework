@@ -159,9 +159,9 @@ public class SonarDbClient implements IDbClient {
         try (Statement st = connection.createStatement()) {
             st.executeUpdate(
                     "INSERT INTO Measurement_Framework_Measures (id, value , Componentsid, Metricsid) " +
-                    "SELECT id, value , Componentsid, Metricsid FROM Measurement_Framework_RecentMeasures " +
+                    "SELECT id, value , Componentsid, Metricsid FROM Measurement_Framework_Recent_Measures " +
                     "WHERE id NOT IN (SELECT id FROM Measurement_Framework_Measures);" +
-                    "DELETE FROM Measurement_Framework_RecentMeasures; ");
+                    "DELETE FROM Measurement_Framework_Recent_Measures; ");
             st.close();
         } catch (SQLException e) {
             log.warn("Can't save recent measures to measures", e);
@@ -182,7 +182,7 @@ public class SonarDbClient implements IDbClient {
             st.executeUpdate(
                     "DROP TABLE Measurement_Framework_Components; " +
                     "DROP TABLE  Measurement_Framework_Measures; " +
-                    "DROP TABLE Measurement_Framework_RecentMeasures")
+                    "DROP TABLE Measurement_Framework_Recent_Measures")
             ;
             st.close();
         } catch (SQLException e) {
@@ -262,7 +262,7 @@ public class SonarDbClient implements IDbClient {
             return;
         }
 
-        String saveMeasureSql= "INSERT INTO Measurement_Framework_RecentMeasures (id, value , Componentsid, Metricsid) VALUES (?, ?, ?, ?)";
+        String saveMeasureSql= "INSERT INTO Measurement_Framework_Recent_Measures (id, value , Componentsid, Metricsid) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement saveMeasure = connection.prepareStatement(saveMeasureSql)) {
             saveMeasure.setString(1, UUID.randomUUID().toString());
@@ -364,7 +364,7 @@ public class SonarDbClient implements IDbClient {
         }
         try (Statement st = connection.createStatement()) {
             Map<String, Integer> measures = new HashMap<>();
-            ResultSet queryResult = st.executeQuery(String.format("SELECT * FROM Measurement_Framework_RecentMeasures WHERE Componentsid = '%s' ", id));
+            ResultSet queryResult = st.executeQuery(String.format("SELECT * FROM Measurement_Framework_Recent_Measures WHERE Componentsid = '%s' ", id));
             while (queryResult.next()) {
                 String metric = queryResult.getString("Metricsid");
                 int value = queryResult.getInt("value");
