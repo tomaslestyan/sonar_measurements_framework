@@ -28,7 +28,7 @@ public class Database {
 	 * @return collection of components, null if connection failed (check the log in that case)
 	 */
 	public static Collection<IComponent> getComponents() {
-		SonarDbClient client = new SonarDbClient(true);
+		SonarDbClient client = SonarDbClient.INSTANCE;
 		Collection<IComponent> components = client.getComponents(null);
 		client.disconnect();
 		return components;
@@ -46,7 +46,7 @@ public class Database {
 	 * @return long term measures of the given metric
 	 */
 	public static List<Integer> getMeasures(String metric) {
-		SonarDbClient client = new SonarDbClient(true);
+		SonarDbClient client = SonarDbClient.INSTANCE;
 		List<Integer> measures = client.getMeasures(metric);
 		client.disconnect();
 		return measures;
@@ -58,7 +58,7 @@ public class Database {
 	 */
 	public static Map<String, List<Integer>> getMeasures(List<String> metrics) {
 		Map<String, List<Integer>> metricsMeasures = new HashMap<>();
-		SonarDbClient client = new SonarDbClient(true);
+		SonarDbClient client = SonarDbClient.INSTANCE;
 		metrics.forEach(x -> metricsMeasures.put(x, client.getMeasures(x)));
 		client.disconnect();
 		return metricsMeasures;
