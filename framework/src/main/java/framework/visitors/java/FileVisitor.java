@@ -86,7 +86,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		client.saveComponent(componentID, context.getFileKey(), project, getParentID(tree), 
 				Scope.CLASS.getValue(), getPackageName(), getClassName(superClass), superInterfaces.stream().map(x -> getClassName(x)).collect(Collectors.toList()), line, endLine);
 		saveMetrics(tree, componentID, Scope.CLASS);
-		client.disconnect();
+		//client.disconnect();
 		super.visitClass(tree);
 	}
 
@@ -100,7 +100,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		getParentID(tree);
 		client.saveComponent(componentID, context.getFileKey(), project, getParentID(tree), 
 				Scope.METHOD.getValue(), getPackageName(), null, Collections.emptyList(), tree.firstToken().line(), tree.lastToken().line());
-		client.disconnect();
+		//client.disconnect();
 		saveMetrics(tree, componentID, Scope.METHOD);
 		super.visitMethod(tree);
 	}
@@ -135,7 +135,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 
 			};
 		});
-		client.disconnect();
+		//client.disconnect();
 	}
 
 	/**

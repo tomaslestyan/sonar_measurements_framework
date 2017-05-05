@@ -19,7 +19,13 @@ public class Configuration {
     /** Password for DB_USER */
     private String dbPassword = "";
 
-    public Configuration() {}
+    public Configuration() {
+        this.connectionString = "jdbc:postgresql://localhost:5432/sonarqube2";
+        this.jdbcDriver = "org.postgresql.Driver";
+        this.dbUser = "postgres";
+        this.dbPassword = "heslo";
+
+    }
 
     public Configuration(String connectionString, String jdbcDriver, String dbUser, String dbPassword) {
         this.connectionString = connectionString;

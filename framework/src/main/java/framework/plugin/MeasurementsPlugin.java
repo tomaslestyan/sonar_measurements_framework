@@ -31,7 +31,7 @@ public class MeasurementsPlugin implements Plugin {
 		//		client.dropTables(); //DEBUG ONLY
 		client.createTables();
 		client.saveRecentMeasuresToMeasures();
-		client.disconnect();
+		//client.disconnect();
 	}
 
 	/* (non-Javadoc)

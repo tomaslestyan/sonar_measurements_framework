@@ -30,7 +30,7 @@ public class Database {
 	public static Collection<IComponent> getComponents() {
 		SonarDbClient client = SonarDbClient.INSTANCE;
 		Collection<IComponent> components = client.getComponents(null);
-		client.disconnect();
+		//client.disconnect();
 		return components;
 	}
 
@@ -48,7 +48,7 @@ public class Database {
 	public static List<Integer> getMeasures(String metric) {
 		SonarDbClient client = SonarDbClient.INSTANCE;
 		List<Integer> measures = client.getMeasures(metric);
-		client.disconnect();
+		//client.disconnect();
 		return measures;
 	}
 
@@ -60,7 +60,7 @@ public class Database {
 		Map<String, List<Integer>> metricsMeasures = new HashMap<>();
 		SonarDbClient client = SonarDbClient.INSTANCE;
 		metrics.forEach(x -> metricsMeasures.put(x, client.getMeasures(x)));
-		client.disconnect();
+		//client.disconnect();
 		return metricsMeasures;
 	}
 
