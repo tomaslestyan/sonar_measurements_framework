@@ -54,7 +54,7 @@ public class SonarDbClient implements IDbClient {
             "parent varchar(255), " +
             "type int NOT NULL,  " +
             "package varchar(255) NOT NULL, " +
-            "superClass varchar(255) NOT NULL, " +
+            "superClass varchar(255), " +
             "interfaces varchar(65536) NOT NULL, " +
             "startLine int, " +
             "endLine int, " +
@@ -69,8 +69,9 @@ public class SonarDbClient implements IDbClient {
     private static final String CREATE_MEASURES = "CREATE TABLE IF NOT EXISTS Measurement_Framework_Measures " + MEASURES_COLUMNS;
     private static final String CREATE_RECENT_MEASURES = "CREATE TABLE IF NOT EXISTS Measurement_Framework_Recent_Measures " + MEASURES_COLUMNS;
 
-    private static final String DELETE_COMPONENT = "DELETE FROM Measurement_Framework_Components WHERE id = ?";
-    private static final String INSERT_COMPONENT = "INTO Measurement_Framework_Components (id , projectKey, fileKey, parent, type, package, superClass, interfaces, startLine, endLine) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String FIND_COMPONENT = "SELECT * FROM Measurement_Framework_Components WHERE id = ?";
+    private static final String INSERT_COMPONENT = "INSERT INTO Measurement_Framework_Components (id , projectKey, fileKey, parent, type, package, superClass, interfaces, startLine, endLine) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String UPDATE_COMPONENT = "UPDATE Measurement_Framework_Components SET projectKey = ?, fileKey = ?, parent = ?, type = ?, package = ?, superClass = ?, interfaces = ?, startLine = ?, endLine = ? WHERE id = ?";
 
 
     /**
@@ -180,10 +181,10 @@ public class SonarDbClient implements IDbClient {
         }
         try (Statement st = connection.createStatement()) {
             st.executeUpdate(
-                    "DROP TABLE Measurement_Framework_Components; " +
                     "DROP TABLE  Measurement_Framework_Measures; " +
-                    "DROP TABLE Measurement_Framework_Recent_Measures")
-            ;
+                    "DROP TABLE Measurement_Framework_Recent_Measures; " +
+                    "DROP TABLE Measurement_Framework_Components;"
+            );
             st.close();
         } catch (SQLException e) {
             log.warn("Can't drop tables", e);
@@ -217,32 +218,55 @@ public class SonarDbClient implements IDbClient {
             // start transaction
             connection.setAutoCommit(false);
 
-            try (PreparedStatement deleteComponent = connection.prepareStatement(DELETE_COMPONENT)) {
-                deleteComponent.setString(1, id);
-                deleteComponent.execute();
-            } catch (SQLException e) {
-                log.warn("Can't delete component: " + id, e);
-            }
+            try (PreparedStatement findComponent = connection.prepareStatement(FIND_COMPONENT)) {
+                findComponent.setString(1, id);
+                ResultSet component = findComponent.executeQuery();
+                if (component.next()) {
+                    try (PreparedStatement updateComponent = connection.prepareStatement(UPDATE_COMPONENT))
+                    {
+                        updateComponent.setString(1, project);
+                        updateComponent.setString(2, fileID);
+                        updateComponent.setString(3, parent);
+                        updateComponent.setInt(4, type);
+                        updateComponent.setString(5, packageName);
+                        updateComponent.setString(6, superClass);
+                        updateComponent.setString(7, interfaceJoiner.toString());
+                        updateComponent.setInt(8, startLine);
+                        updateComponent.setInt(9, endLine);
+                        updateComponent.setString(10, id);
+                        updateComponent.execute();
 
-            try (PreparedStatement insertComponent = connection.prepareStatement(INSERT_COMPONENT))
-            {
-                insertComponent.setString(1, id);
-                insertComponent.setString(2, project);
-                insertComponent.setString(3, fileID);
-                insertComponent.setString(4, parent);
-                insertComponent.setInt(5, type);
-                insertComponent.setString(6, packageName);
-                insertComponent.setString(7, superClass);
-                insertComponent.setString(8, interfaceJoiner.toString());
-                insertComponent.setInt(9, startLine);
-                insertComponent.setInt(10, endLine);
-                insertComponent.execute();
+                    }  catch (SQLException e) {
+                        log.warn("Can't update the value of component: " + id, e);
+                        return;
+                    }
+                }
+                else {
+                    try (PreparedStatement insertOrUpdateComponent = connection.prepareStatement(INSERT_COMPONENT)) {
+                        insertOrUpdateComponent.setString(1, id);
+                        insertOrUpdateComponent.setString(2, project);
+                        insertOrUpdateComponent.setString(3, fileID);
+                        insertOrUpdateComponent.setString(4, parent);
+                        insertOrUpdateComponent.setInt(5, type);
+                        insertOrUpdateComponent.setString(6, packageName);
+                        insertOrUpdateComponent.setString(7, superClass);
+                        insertOrUpdateComponent.setString(8, interfaceJoiner.toString());
+                        insertOrUpdateComponent.setInt(9, startLine);
+                        insertOrUpdateComponent.setInt(10, endLine);
+                        insertOrUpdateComponent.execute();
 
+                    } catch (SQLException e) {
+                        log.warn("Can't save the value of component: " + id, e);
+                        return;
+                    }
+                }
             } catch (SQLException e) {
-                log.warn("Can't save the value of component: " + id, e);
+                log.warn("Can't find component: " + id, e);
+                return;
             }
 
             // commit transaction
+            connection.commit();
             connection.setAutoCommit(true);
         } catch (SQLException e) {
             log.warn("Can't proceed transaction" + id, e);
