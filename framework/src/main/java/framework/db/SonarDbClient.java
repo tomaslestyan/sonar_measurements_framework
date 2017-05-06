@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 import java.util.UUID;
 
+import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.measures.Metric;
@@ -42,10 +43,9 @@ public class SonarDbClient implements IDbClient {
     public static final SonarDbClient INSTANCE = new SonarDbClient();
    /** The logger object */
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-    /** DB connection */
-    private Connection connection;
-    /** Timeout for reasonable connection validation  */
-    private static final int TIMEOUT = 1000;
+
+    private HikariDataSource dataSource;
+
     private static final String CREATE_COMPONENTS = "CREATE TABLE IF NOT EXISTS Measurement_Framework_Components (" +
             "id varchar(255) NOT NULL, " +
             "projectKey varchar(255) NOT NULL, " +
@@ -91,54 +91,18 @@ public class SonarDbClient implements IDbClient {
      * Constructor
      */
     private SonarDbClient() {
-        connect();
-    }
+        Configuration configuration = Configuration.INSTANCE;
 
-    /**
-     * (Try to) Establish DB connection
-     * Do not forget to call disconnect() after session ends.
-     */
-    private void connect() {
-        try {
-            if (!isConnected()) {
-                Configuration configuration = Configuration.INSTANCE;
-
-                if (!configuration.verifyJdbcDriver()) {
-                    log.warn("JDBC driver cannot be found");
-                }
-                connection = DriverManager.getConnection(
-                        configuration.getConnectionString(),
-                        configuration.getDbUser(),
-                        configuration.getDbPassword()
-                );
-            }
-        } catch (SQLException e) {
-            // could not create connection
-            connection = null;
-            log.warn("Connection with SonarQube database not established", e);
+        if (!configuration.verifyJdbcDriver()) {
+            log.warn("JDBC driver cannot be found");
         }
-    }
 
-    /**
-     * Disconnect from DB. It has to be used to terminate connection.
-     */
-    public void disconnect() {
-        try {
-            if (connection != null) {
-                connection.close();
-            }
-        } catch (SQLException e) {
-            log.warn("Can't close the connection", e);
-        }
-    }
+        this.dataSource = new HikariDataSource();
+        this.dataSource.setJdbcUrl(configuration.getConnectionString());
+        this.dataSource.setUsername(configuration.getDbUser());
+        this.dataSource.setPassword(configuration.getDbPassword());
 
-    /**
-     * @return <code>true</code> if client is connected, <code>false</code> otherwise
-     */
-    public boolean isConnected() {
-        return isConnectionValid();
     }
-
 
     /**
      * Create mandatory tables in Sonar DB if they were not created yet.
@@ -146,13 +110,11 @@ public class SonarDbClient implements IDbClient {
      * @return <code>true</code> if tables was created or the were created before, <code>false</code> otherwise
      */
     public boolean createTables() {
-        // check connection
-        if (!isConnectionValid()) {
-            return false;
-        }
-        try (Statement st = this.connection.createStatement()) {
+        try (Connection connection = this.dataSource.getConnection();
+         Statement st = connection.createStatement()) {
             st.executeUpdate(CREATE_COMPONENTS + CREATE_MEASURES + CREATE_RECENT_MEASURES);
             st.close();
+            connection.close();
         } catch (SQLException e) {
             log.warn("Can't create the plugin tables", e);
             return false;
@@ -166,15 +128,13 @@ public class SonarDbClient implements IDbClient {
      * @return <code>true</code> if tables was created or the were created before, <code>false</code> otherwise
      */
     public boolean saveRecentMeasuresToMeasures() {
-        // check connection
-        if (!isConnectionValid()) {
-            return false;
-        }
-        try (Statement st = connection.createStatement()) {
+        try (Connection connection = this.dataSource.getConnection();
+         Statement st = connection.createStatement()) {
             st.executeUpdate(
                     COPY_RECENT_MEASURES_TO_MEASURES +
                     EMPTY_RECENT_MEASURES);
             st.close();
+            connection.close();
         } catch (SQLException e) {
             log.warn("Can't save recent measures to measures", e);
             return false;
@@ -186,17 +146,15 @@ public class SonarDbClient implements IDbClient {
      * Drop mandatory tables in Sonar DB
      */
     public void dropTables() {
-        // check connection
-        if (!isConnectionValid()) {
-            return;
-        }
-        try (Statement st = connection.createStatement()) {
+        try (Connection connection = this.dataSource.getConnection();
+         Statement st = connection.createStatement()) {
             st.executeUpdate(
                     "DROP TABLE  Measurement_Framework_Measures; " +
                     "DROP TABLE Measurement_Framework_Recent_Measures; " +
                     "DROP TABLE Measurement_Framework_Components;"
             );
             st.close();
+            connection.close();
         } catch (SQLException e) {
             log.warn("Can't drop tables", e);
         }
@@ -217,70 +175,65 @@ public class SonarDbClient implements IDbClient {
      * @param endLine
      */
     public void saveComponent(String id, String fileID, String project, String parent, int type, String packageName, String superClass, Collection<String> interfaces, int startLine, int endLine) {
-        // check connection
-        if (!isConnectionValid()) {
-            return;
-        }
         log.info("Measurement framework: saving component" + id);
         StringJoiner interfaceJoiner = new StringJoiner(",");
         interfaces.forEach(interfaceJoiner::add);
 
-        try {
+        try (Connection connection = this.dataSource.getConnection();
+         PreparedStatement findComponent = connection.prepareStatement(FIND_COMPONENT)) {
             // start transaction
             connection.setAutoCommit(false);
 
-            try (PreparedStatement findComponent = connection.prepareStatement(FIND_COMPONENT)) {
-                findComponent.setString(1, id);
-                ResultSet component = findComponent.executeQuery();
-                if (component.next()) {
-                    try (PreparedStatement updateComponent = connection.prepareStatement(UPDATE_COMPONENT))
-                    {
-                        updateComponent.setString(1, project);
-                        updateComponent.setString(2, fileID);
-                        updateComponent.setString(3, parent);
-                        updateComponent.setInt(4, type);
-                        updateComponent.setString(5, packageName);
-                        updateComponent.setString(6, superClass);
-                        updateComponent.setString(7, interfaceJoiner.toString());
-                        updateComponent.setInt(8, startLine);
-                        updateComponent.setInt(9, endLine);
-                        updateComponent.setString(10, id);
-                        updateComponent.execute();
+            findComponent.setString(1, id);
+            ResultSet component = findComponent.executeQuery();
+            if (component.next()) {
+                try (PreparedStatement updateComponent = connection.prepareStatement(UPDATE_COMPONENT))
+                {
+                    updateComponent.setString(1, project);
+                    updateComponent.setString(2, fileID);
+                    updateComponent.setString(3, parent);
+                    updateComponent.setInt(4, type);
+                    updateComponent.setString(5, packageName);
+                    updateComponent.setString(6, superClass);
+                    updateComponent.setString(7, interfaceJoiner.toString());
+                    updateComponent.setInt(8, startLine);
+                    updateComponent.setInt(9, endLine);
+                    updateComponent.setString(10, id);
+                    updateComponent.execute();
 
-                    }  catch (SQLException e) {
-                        log.warn("Can't update the value of component: " + id, e);
-                        return;
-                    }
+                }  catch (SQLException e) {
+                    log.warn("Can't update the value of component: " + id, e);
+                    return;
                 }
-                else {
-                    try (PreparedStatement insertOrUpdateComponent = connection.prepareStatement(INSERT_COMPONENT)) {
-                        insertOrUpdateComponent.setString(1, id);
-                        insertOrUpdateComponent.setString(2, project);
-                        insertOrUpdateComponent.setString(3, fileID);
-                        insertOrUpdateComponent.setString(4, parent);
-                        insertOrUpdateComponent.setInt(5, type);
-                        insertOrUpdateComponent.setString(6, packageName);
-                        insertOrUpdateComponent.setString(7, superClass);
-                        insertOrUpdateComponent.setString(8, interfaceJoiner.toString());
-                        insertOrUpdateComponent.setInt(9, startLine);
-                        insertOrUpdateComponent.setInt(10, endLine);
-                        insertOrUpdateComponent.execute();
-
-                    } catch (SQLException e) {
-                        log.warn("Can't save the value of component: " + id, e);
-                        return;
-                    }
-                }
-            } catch (SQLException e) {
-                log.warn("Can't find component: " + id, e);
-                return;
             }
+            else {
+                try (PreparedStatement insertComponent = connection.prepareStatement(INSERT_COMPONENT)) {
+                    insertComponent.setString(1, id);
+                    insertComponent.setString(2, project);
+                    insertComponent.setString(3, fileID);
+                    insertComponent.setString(4, parent);
+                    insertComponent.setInt(5, type);
+                    insertComponent.setString(6, packageName);
+                    insertComponent.setString(7, superClass);
+                    insertComponent.setString(8, interfaceJoiner.toString());
+                    insertComponent.setInt(9, startLine);
+                    insertComponent.setInt(10, endLine);
+                    insertComponent.execute();
 
+                } catch (SQLException e) {
+                    log.warn("Can't save the value of component: " + id, e);
+                    return;
+                }
+            }
+            component.close();
             // commit transaction
             connection.commit();
             connection.setAutoCommit(true);
+            connection.close();
+
         } catch (SQLException e) {
-            log.warn("Can't proceed transaction" + id, e);
+            log.warn("Can't find component: " + id, e);
+            return;
         }
     }
 
@@ -292,17 +245,14 @@ public class SonarDbClient implements IDbClient {
      * @param value
      */
     public void saveMeasure(Metric<? extends Serializable> metric, String componentID, int value) {
-        // check connection
-        if (!isConnectionValid()) {
-            return;
-        }
-
-        try (PreparedStatement saveMeasure = connection.prepareStatement(SAVE_MEASURE)) {
+        try (Connection connection = this.dataSource.getConnection();
+         PreparedStatement saveMeasure = connection.prepareStatement(SAVE_MEASURE)) {
             saveMeasure.setString(1, UUID.randomUUID().toString());
             saveMeasure.setInt(2, value);
             saveMeasure.setString(3, componentID);
             saveMeasure.setString(4, metric.getKey());
             saveMeasure.execute();
+            connection.close();
         } catch (SQLException e) {
             log.warn("Can't save the measurement for metric: " + metric.getKey(), e);
         }
@@ -315,14 +265,11 @@ public class SonarDbClient implements IDbClient {
      * @return collections of components
      */
     public Collection<IComponent> getComponents(String parent) {
-        // check connection
-        if (!isConnectionValid()) {
-            return Collections.emptyList();
-        }
         Collection<IComponent> components = new ArrayList<>();
 
         String selectSql = parent == null ? SELECT_ALL_COMPONENTS : SELECT_COMPONENTS_BY_PARENT;
-        try (PreparedStatement selectComponents = connection.prepareStatement(selectSql)) {
+        try (Connection connection = this.dataSource.getConnection();
+         PreparedStatement selectComponents = connection.prepareStatement(selectSql)) {
             if (parent != null) {
                 selectComponents.setString(1, parent);
             }
@@ -334,6 +281,7 @@ public class SonarDbClient implements IDbClient {
                 }
             }
             queryResult.close();
+            connection.close();
         } catch (SQLException e) {
             log.warn("Can't retrieve components", e);
         }
@@ -394,22 +342,19 @@ public class SonarDbClient implements IDbClient {
      * @return measures
      */
     private Map<String, Integer> getRecentMeasures(String id) {
-        // check connection
-        if (!isConnectionValid()) {
-            return null;
-        }
-        try (Statement st = connection.createStatement()) {
-            Map<String, Integer> measures = new HashMap<>();
-            PreparedStatement selectMeasures = connection.prepareStatement(SELECT_RECENT_MEASURES_FOR_COMPONENT);
-            selectMeasures.setString(1, id);
-            ResultSet queryResult = selectMeasures.executeQuery();
-            while (queryResult.next()) {
-                String metric = queryResult.getString("Metricsid");
-                int value = queryResult.getInt("value");
-                measures.put(metric, Integer.valueOf(value));
+        try (Connection connection = this.dataSource.getConnection()) {
+            try (PreparedStatement selectMeasures = connection.prepareStatement(SELECT_RECENT_MEASURES_FOR_COMPONENT)) {
+                Map<String, Integer> measures = new HashMap<>();
+                selectMeasures.setString(1, id);
+                ResultSet queryResult = selectMeasures.executeQuery();
+                while (queryResult.next()) {
+                    String metric = queryResult.getString("Metricsid");
+                    int value = queryResult.getInt("value");
+                    measures.put(metric, Integer.valueOf(value));
+                }
+                queryResult.close();
+                return measures;
             }
-            queryResult.close();
-            return measures;
         } catch (SQLException e) {
             log.warn("Can't retrieve recent measures", e);
         }
@@ -423,13 +368,10 @@ public class SonarDbClient implements IDbClient {
      * @return measures
      */
     public List<Integer> getMeasures(String metric) {
-        // check connection
-        if (!isConnectionValid()) {
-            return null;
-        }
-        try (Statement st = connection.createStatement()) {
+        try (Connection connection = this.dataSource.getConnection();
+         PreparedStatement selectMeasures = connection.prepareStatement(SELECT_MEASURES_FOR_METRIC);) {
             List<Integer> measures = new ArrayList<>();
-            PreparedStatement selectMeasures = connection.prepareStatement(SELECT_MEASURES_FOR_METRIC);
+
             selectMeasures.setString(1, metric);
             ResultSet queryResult = selectMeasures.executeQuery();
             while (queryResult.next()) {
@@ -437,35 +379,11 @@ public class SonarDbClient implements IDbClient {
                 measures.add(Integer.valueOf(value));
             }
             queryResult.close();
+            connection.close();
             return measures;
         } catch (SQLException e) {
             log.warn("Can't retrieve measures", e);
         }
         return null;
-    }
-
-    /**
-     * Check if connection is valid
-     *
-     * @return <code>true</code> if is valid, <code>false</code> otherwise
-     * @throws SQLException
-     */
-    private boolean isConnectionValid() {
-        try {
-            return connection != null && connection.isValid(TIMEOUT);
-        } catch (SQLException e) {
-            log.warn("Can't validate connection", e);
-        }
-        return false;
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#finalize()
-     * Do not rely on this finalize. Yes it disconnects from DB, but not guaranteed when the GC will call it.
-     */
-    @Override
-    protected void finalize() throws Throwable {
-        disconnect();
-        super.finalize();
     }
 }
