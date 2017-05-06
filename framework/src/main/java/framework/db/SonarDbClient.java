@@ -40,13 +40,12 @@ import main.java.framework.api.components.MethodComponent;
 public class SonarDbClient implements IDbClient {
 
     public static final SonarDbClient INSTANCE = new SonarDbClient();
-    /** The logger object */
+   /** The logger object */
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     /** DB connection */
     private Connection connection;
     /** Timeout for reasonable connection validation  */
     private static final int TIMEOUT = 1000;
-
     private static final String CREATE_COMPONENTS = "CREATE TABLE IF NOT EXISTS Measurement_Framework_Components (" +
             "id varchar(255) NOT NULL, " +
             "projectKey varchar(255) NOT NULL, " +
@@ -67,11 +66,25 @@ public class SonarDbClient implements IDbClient {
                     "MetricsId varchar(255) NOT NULL REFERENCES Metrics (name), PRIMARY KEY (id));";
 
     private static final String CREATE_MEASURES = "CREATE TABLE IF NOT EXISTS Measurement_Framework_Measures " + MEASURES_COLUMNS;
+
     private static final String CREATE_RECENT_MEASURES = "CREATE TABLE IF NOT EXISTS Measurement_Framework_Recent_Measures " + MEASURES_COLUMNS;
 
-    private static final String FIND_COMPONENT = "SELECT * FROM Measurement_Framework_Components WHERE id = ?";
-    private static final String INSERT_COMPONENT = "INSERT INTO Measurement_Framework_Components (id , projectKey, fileKey, parent, type, package, superClass, interfaces, startLine, endLine) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String UPDATE_COMPONENT = "UPDATE Measurement_Framework_Components SET projectKey = ?, fileKey = ?, parent = ?, type = ?, package = ?, superClass = ?, interfaces = ?, startLine = ?, endLine = ? WHERE id = ?";
+    private static final String FIND_COMPONENT = "SELECT * FROM Measurement_Framework_Components WHERE id = ?;";
+    private static final String INSERT_COMPONENT = "INSERT INTO Measurement_Framework_Components (id , projectKey, fileKey, parent, type, package, superClass, interfaces, startLine, endLine) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    private static final String UPDATE_COMPONENT = "UPDATE Measurement_Framework_Components SET projectKey = ?, fileKey = ?, parent = ?, type = ?, package = ?, superClass = ?, interfaces = ?, startLine = ?, endLine = ? WHERE id = ?;";
+
+    private static final String SAVE_MEASURE = "INSERT INTO Measurement_Framework_Recent_Measures (id, value , Componentsid, Metricsid) VALUES (?, ?, ?, ?)";
+
+    private static final String COPY_RECENT_MEASURES_TO_MEASURES = "INSERT INTO Measurement_Framework_Measures (id, value , Componentsid, Metricsid) " +
+            "SELECT id, value , Componentsid, Metricsid FROM Measurement_Framework_Recent_Measures " +
+            "WHERE id NOT IN (SELECT id FROM Measurement_Framework_Measures);";
+    private static final String EMPTY_RECENT_MEASURES = "DELETE FROM Measurement_Framework_Recent_Measures;";
+
+    private static final String SELECT_ALL_COMPONENTS = "SELECT * FROM Measurement_Framework_Components;";
+    private static final String SELECT_COMPONENTS_BY_PARENT = "SELECT * FROM Measurement_Framework_Components WHERE parent = ?;";
+    private static final String SELECT_RECENT_MEASURES_FOR_COMPONENT = "SELECT * FROM Measurement_Framework_Recent_Measures WHERE Componentsid = ?;";
+    private static final String SELECT_MEASURES_FOR_METRIC = "SELECT * FROM Measurement_Framework_Measures WHERE Metricsid = ?;";
+
 
 
     /**
@@ -159,10 +172,8 @@ public class SonarDbClient implements IDbClient {
         }
         try (Statement st = connection.createStatement()) {
             st.executeUpdate(
-                    "INSERT INTO Measurement_Framework_Measures (id, value , Componentsid, Metricsid) " +
-                    "SELECT id, value , Componentsid, Metricsid FROM Measurement_Framework_Recent_Measures " +
-                    "WHERE id NOT IN (SELECT id FROM Measurement_Framework_Measures);" +
-                    "DELETE FROM Measurement_Framework_Recent_Measures; ");
+                    COPY_RECENT_MEASURES_TO_MEASURES +
+                    EMPTY_RECENT_MEASURES);
             st.close();
         } catch (SQLException e) {
             log.warn("Can't save recent measures to measures", e);
@@ -286,9 +297,7 @@ public class SonarDbClient implements IDbClient {
             return;
         }
 
-        String saveMeasureSql= "INSERT INTO Measurement_Framework_Recent_Measures (id, value , Componentsid, Metricsid) VALUES (?, ?, ?, ?)";
-
-        try (PreparedStatement saveMeasure = connection.prepareStatement(saveMeasureSql)) {
+        try (PreparedStatement saveMeasure = connection.prepareStatement(SAVE_MEASURE)) {
             saveMeasure.setString(1, UUID.randomUUID().toString());
             saveMeasure.setInt(2, value);
             saveMeasure.setString(3, componentID);
@@ -311,10 +320,13 @@ public class SonarDbClient implements IDbClient {
             return Collections.emptyList();
         }
         Collection<IComponent> components = new ArrayList<>();
-        try (Statement st = connection.createStatement()) {
-            ResultSet queryResult = (parent == null)
-                    ? st.executeQuery("SELECT * FROM Measurement_Framework_Components")
-                    : st.executeQuery(String.format("SELECT * FROM Measurement_Framework_Components WHERE parent = '%s' ", parent));
+
+        String selectSql = parent == null ? SELECT_ALL_COMPONENTS : SELECT_COMPONENTS_BY_PARENT;
+        try (PreparedStatement selectComponents = connection.prepareStatement(selectSql)) {
+            if (parent != null) {
+                selectComponents.setString(1, parent);
+            }
+            ResultSet queryResult = selectComponents.executeQuery();
             while (queryResult.next()) {
                 IComponent component = parseComponentFromQuery(queryResult);
                 if (component != null) {
@@ -388,7 +400,9 @@ public class SonarDbClient implements IDbClient {
         }
         try (Statement st = connection.createStatement()) {
             Map<String, Integer> measures = new HashMap<>();
-            ResultSet queryResult = st.executeQuery(String.format("SELECT * FROM Measurement_Framework_Recent_Measures WHERE Componentsid = '%s' ", id));
+            PreparedStatement selectMeasures = connection.prepareStatement(SELECT_RECENT_MEASURES_FOR_COMPONENT);
+            selectMeasures.setString(1, id);
+            ResultSet queryResult = selectMeasures.executeQuery();
             while (queryResult.next()) {
                 String metric = queryResult.getString("Metricsid");
                 int value = queryResult.getInt("value");
@@ -415,7 +429,9 @@ public class SonarDbClient implements IDbClient {
         }
         try (Statement st = connection.createStatement()) {
             List<Integer> measures = new ArrayList<>();
-            ResultSet queryResult = st.executeQuery(String.format("SELECT * FROM Measurement_Framework_Measures WHERE Metricsid = '%s' ", metric));
+            PreparedStatement selectMeasures = connection.prepareStatement(SELECT_MEASURES_FOR_METRIC);
+            selectMeasures.setString(1, metric);
+            ResultSet queryResult = selectMeasures.executeQuery();
             while (queryResult.next()) {
                 int value = queryResult.getInt("value");
                 measures.add(Integer.valueOf(value));
