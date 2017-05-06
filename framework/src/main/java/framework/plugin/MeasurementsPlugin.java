@@ -4,6 +4,9 @@
  */
 package main.java.framework.plugin;
 
+import main.java.framework.db.Configuration;
+import main.java.framework.db.DataSourceProvider;
+import main.java.framework.db.SchemaManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.Plugin;
@@ -26,12 +29,19 @@ public class MeasurementsPlugin implements Plugin {
 	 */
 	public MeasurementsPlugin() {
 		log.info("plugin created");
+		// get database configuration
+		Configuration configuration = Configuration.INSTANCE;
+		DataSourceProvider.setConfiguration(configuration);
+
+
 		// create tables if runs first time
-		SonarDbClient client = SonarDbClient.INSTANCE;
-		//		client.dropTables(); //DEBUG ONLY
-		client.createTables();
+		SchemaManager schemaManager = new SchemaManager(DataSourceProvider.getDataSource());
+		//		schemaManager.dropTables(); //DEBUG ONLY
+		schemaManager.createTables();
+
+
+		SonarDbClient client = new SonarDbClient(DataSourceProvider.getDataSource());
 		client.saveRecentMeasuresToMeasures();
-		//client.disconnect();
 	}
 
 	/* (non-Javadoc)

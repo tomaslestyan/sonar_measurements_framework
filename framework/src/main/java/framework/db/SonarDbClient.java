@@ -38,36 +38,12 @@ import main.java.framework.api.components.MethodComponent;
  * @author Tomas Lestyan
  * @author Klara Erlebachova
  */
-public class SonarDbClient implements IDbClient {
+public class SonarDbClient {
 
-    public static final SonarDbClient INSTANCE = new SonarDbClient();
    /** The logger object */
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private HikariDataSource dataSource;
-
-    private static final String CREATE_COMPONENTS = "CREATE TABLE IF NOT EXISTS Measurement_Framework_Components (" +
-            "id varchar(255) NOT NULL, " +
-            "projectKey varchar(255) NOT NULL, " +
-            "fileKey varchar(255) NOT NULL, " +
-            "parent varchar(255), " +
-            "type int NOT NULL,  " +
-            "package varchar(255) NOT NULL, " +
-            "superClass varchar(255), " +
-            "interfaces varchar(65536) NOT NULL, " +
-            "startLine int, " +
-            "endLine int, " +
-            "PRIMARY KEY (id));";
-
-    private static final String MEASURES_COLUMNS =
-            "(id varchar(255) NOT NULL, " +
-                    "value int, " +
-                    "ComponentsId varchar(255) NOT NULL REFERENCES Measurement_Framework_Components (id), " +
-                    "MetricsId varchar(255) NOT NULL REFERENCES Metrics (name), PRIMARY KEY (id));";
-
-    private static final String CREATE_MEASURES = "CREATE TABLE IF NOT EXISTS Measurement_Framework_Measures " + MEASURES_COLUMNS;
-
-    private static final String CREATE_RECENT_MEASURES = "CREATE TABLE IF NOT EXISTS Measurement_Framework_Recent_Measures " + MEASURES_COLUMNS;
 
     private static final String FIND_COMPONENT = "SELECT * FROM Measurement_Framework_Components WHERE id = ?;";
     private static final String INSERT_COMPONENT = "INSERT INTO Measurement_Framework_Components (id , projectKey, fileKey, parent, type, package, superClass, interfaces, startLine, endLine) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
@@ -85,41 +61,11 @@ public class SonarDbClient implements IDbClient {
     private static final String SELECT_RECENT_MEASURES_FOR_COMPONENT = "SELECT * FROM Measurement_Framework_Recent_Measures WHERE Componentsid = ?;";
     private static final String SELECT_MEASURES_FOR_METRIC = "SELECT * FROM Measurement_Framework_Measures WHERE Metricsid = ?;";
 
-
-
     /**
      * Constructor
      */
-    private SonarDbClient() {
-        Configuration configuration = Configuration.INSTANCE;
-
-        if (!configuration.verifyJdbcDriver()) {
-            log.warn("JDBC driver cannot be found");
-        }
-
-        this.dataSource = new HikariDataSource();
-        this.dataSource.setJdbcUrl(configuration.getConnectionString());
-        this.dataSource.setUsername(configuration.getDbUser());
-        this.dataSource.setPassword(configuration.getDbPassword());
-
-    }
-
-    /**
-     * Create mandatory tables in Sonar DB if they were not created yet.
-     *
-     * @return <code>true</code> if tables was created or the were created before, <code>false</code> otherwise
-     */
-    public boolean createTables() {
-        try (Connection connection = this.dataSource.getConnection();
-         Statement st = connection.createStatement()) {
-            st.executeUpdate(CREATE_COMPONENTS + CREATE_MEASURES + CREATE_RECENT_MEASURES);
-            st.close();
-            connection.close();
-        } catch (SQLException e) {
-            log.warn("Can't create the plugin tables", e);
-            return false;
-        }
-        return true;
+    public SonarDbClient(HikariDataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     /**
@@ -140,24 +86,6 @@ public class SonarDbClient implements IDbClient {
             return false;
         }
         return true;
-    }
-
-    /**
-     * Drop mandatory tables in Sonar DB
-     */
-    public void dropTables() {
-        try (Connection connection = this.dataSource.getConnection();
-         Statement st = connection.createStatement()) {
-            st.executeUpdate(
-                    "DROP TABLE  Measurement_Framework_Measures; " +
-                    "DROP TABLE Measurement_Framework_Recent_Measures; " +
-                    "DROP TABLE Measurement_Framework_Components;"
-            );
-            st.close();
-            connection.close();
-        } catch (SQLException e) {
-            log.warn("Can't drop tables", e);
-        }
     }
 
     /**

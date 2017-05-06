@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import main.java.framework.db.DataSourceProvider;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.sonar.api.batch.Phase;
 import org.sonar.check.Rule;
@@ -79,7 +80,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		List<String> imports = getImports();
 		int line = tree.declarationKeyword().line();
 		int endLine = tree.lastToken().line();
-		SonarDbClient client = SonarDbClient.INSTANCE;
+		SonarDbClient client = new SonarDbClient(DataSourceProvider.getDataSource());
 		String componentID = context.getFileKey() + "->" + tree.simpleName().name();
 		TypeTree superClass = tree.superClass();
 		ListTree<TypeTree> superInterfaces = tree.superInterfaces();
@@ -95,7 +96,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 	 */
 	@Override
 	public void visitMethod(MethodTree tree) {
-		SonarDbClient client = SonarDbClient.INSTANCE;
+		SonarDbClient client = new SonarDbClient(DataSourceProvider.getDataSource());
 		String componentID = context.getFileKey() + "->" + tree.simpleName().name();
 		getParentID(tree);
 		client.saveComponent(componentID, context.getFileKey(), project, getParentID(tree), 
@@ -124,7 +125,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 	 */
 	@SuppressWarnings("unchecked")
 	private void saveMetrics(Tree tree, String componentID, Scope scope) {
-		SonarDbClient client = SonarDbClient.INSTANCE;
+		SonarDbClient client = new SonarDbClient(DataSourceProvider.getDataSource());
 		MetricsRegister.getFrameworkMetrics().forEach(x -> {
 			ICommonVisitor javaVisitor = MetricsRegister.getMetricVisitorForLanguage(x, Language.JAVA);
 			boolean isInScope = javaVisitor.getScope() == Scope.ALL || javaVisitor.getScope() == scope;
