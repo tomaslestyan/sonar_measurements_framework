@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import main.java.framework.api.components.ClassComponent;
 import main.java.framework.api.components.IComponent;
+import main.java.framework.db.DataSourceProvider;
 import main.java.framework.db.SonarDbClient;
 
 /**
@@ -28,10 +29,8 @@ public class Database {
 	 * @return collection of components, null if connection failed (check the log in that case)
 	 */
 	public static Collection<IComponent> getComponents() {
-		SonarDbClient client = new SonarDbClient(true);
-		Collection<IComponent> components = client.getComponents(null);
-		client.disconnect();
-		return components;
+		SonarDbClient client = new SonarDbClient(DataSourceProvider.getDataSource());
+		return client.getComponents(null);
 	}
 
 	/**
@@ -46,10 +45,8 @@ public class Database {
 	 * @return long term measures of the given metric
 	 */
 	public static List<Integer> getMeasures(String metric) {
-		SonarDbClient client = new SonarDbClient(true);
-		List<Integer> measures = client.getMeasures(metric);
-		client.disconnect();
-		return measures;
+		SonarDbClient client = new SonarDbClient(DataSourceProvider.getDataSource());
+		return client.getMeasures(metric);
 	}
 
 	/**
@@ -58,9 +55,8 @@ public class Database {
 	 */
 	public static Map<String, List<Integer>> getMeasures(List<String> metrics) {
 		Map<String, List<Integer>> metricsMeasures = new HashMap<>();
-		SonarDbClient client = new SonarDbClient(true);
+		SonarDbClient client = new SonarDbClient(DataSourceProvider.getDataSource());
 		metrics.forEach(x -> metricsMeasures.put(x, client.getMeasures(x)));
-		client.disconnect();
 		return metricsMeasures;
 	}
 
