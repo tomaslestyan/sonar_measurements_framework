@@ -31,9 +31,7 @@ import java.util.Map;
  */
 public class SonarDbClient {
 
-    private static final String SELECT_CHILD_CLASSES = "SELECT * FROM Measurement_Framework_Components WHERE superclass = ? AND type = 1";
-    private static final String SELECT_ROOT_CLASSES = "SELECT * FROM Measurement_Framework_Components WHERE (superclass IS NULL OR superclass NOT IN (SELECT * FROM Measurement_Framework_Components WHERE project = ?) AND TYPE = 1 AND project = ?";
-    /** The logger object */
+   /** The logger object */
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private HikariDataSource dataSource;
@@ -42,6 +40,10 @@ public class SonarDbClient {
     private static final String SELECT_COMPONENTS_BY_PARENT = "SELECT * FROM Measurement_Framework_Components WHERE parent = ?;";
     private static final String SELECT_RECENT_MEASURES_FOR_COMPONENT = "SELECT * FROM Measurement_Framework_Recent_Measures WHERE Componentsid = ?;";
     private static final String SELECT_MEASURES_FOR_METRIC = "SELECT * FROM Measurement_Framework_Measures WHERE Metricsid = ?;";
+
+    private static final String SELECT_CHILD_CLASSES = "SELECT * FROM Measurement_Framework_Components WHERE superclass = ? AND type = 1";
+    private static final String SELECT_ROOT_CLASSES = "SELECT * FROM Measurement_Framework_Components WHERE (superclass IS NULL OR superclass NOT IN (SELECT id FROM Measurement_Framework_Components WHERE projectKey = ?)) AND TYPE = 1 AND projectKey = ?";
+
 
     /**
      * Constructor

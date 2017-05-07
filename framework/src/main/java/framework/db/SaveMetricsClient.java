@@ -41,7 +41,7 @@ public class SaveMetricsClient {
             "SELECT id, value , Componentsid, Metricsid FROM Measurement_Framework_Recent_Measures " +
             "WHERE id NOT IN (SELECT id FROM Measurement_Framework_Measures);";
 
-    private static final String DELETE_RECENT_MEASURE = "DELETE * FROM Measurement_Framework_Recent_Measures WHERE Componentsid = ? and Metricsid = ?";
+    private static final String DELETE_RECENT_MEASURE = "DELETE FROM Measurement_Framework_Recent_Measures WHERE Componentsid = ? and Metricsid = ?";
     private static final String SAVE_RECENT_MEASURE = "INSERT INTO Measurement_Framework_Recent_Measures (id, value , Componentsid, Metricsid) VALUES (?, ?, ?, ?)";
 
     /**
