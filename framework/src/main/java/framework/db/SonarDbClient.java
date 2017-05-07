@@ -31,7 +31,9 @@ import java.util.Map;
  */
 public class SonarDbClient {
 
-   /** The logger object */
+    private static final String SELECT_CHILD_CLASSES = "SELECT * FROM Measurement_Framework_Components WHERE superclass = ? AND type = 1";
+    private static final String SELECT_ROOT_CLASSES = "SELECT * FROM Measurement_Framework_Components WHERE (superclass IS NULL OR superclass NOT IN (SELECT * FROM Measurement_Framework_Components WHERE project = ?) AND TYPE = 1 AND project = ?";
+    /** The logger object */
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private HikariDataSource dataSource;
@@ -175,4 +177,85 @@ public class SonarDbClient {
         }
         return null;
     }
+
+    /** Get classes from classes for project in tree hierarchy
+     * @return collections of components
+     */
+    public Collection<ClassComponent> getRootClasses(String projectKee) {
+        Collection<ClassComponent> components = new ArrayList<>();
+        try (Connection connection = this.dataSource.getConnection()) {
+            try (PreparedStatement findRootClasses = connection.prepareStatement(SELECT_ROOT_CLASSES)) {
+                findRootClasses.setString(1, projectKee);
+                findRootClasses.setString(2, projectKee);
+                try (ResultSet queryResult = findRootClasses.executeQuery()) {
+                    while (queryResult.next()) {
+                        ClassComponent component = parseClassFromQuery(queryResult);
+                        if (component != null) {
+                            components.add(component);
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            log.warn("Can't retrieve components", e);
+        }
+        return components;
+    }
+
+    /**
+     * Parse class from query result
+     * @param queryResult
+     * @throws SQLException
+     */
+    private ClassComponent parseClassFromQuery(ResultSet queryResult) throws SQLException {
+        String id = queryResult.getString("ID");
+        String sonarKey = queryResult.getString("projectKey");
+        String fileKey = queryResult.getString("fileKey");
+        String parentID = queryResult.getString("parent");
+        String packageName = queryResult.getString("package");
+        String superclass = queryResult.getString("superclass");
+        String interfaces = queryResult.getString("interfaces");
+        int start = queryResult.getInt("STARTLINE");
+        int end = queryResult.getInt("ENDLINE");
+        Map<String, Integer> measures = getRecentMeasures(id);
+
+        return (ClassComponent) ClassComponent.builder()
+                .setId(id)
+                .setSonarProjectID(sonarKey)
+                .setFileKey(fileKey)
+                .setParentClass(parentID)
+                .setMeasures(measures)
+                .setChildrenClasses(getChildClassesFor(id))
+                .setPackageName(packageName)
+                .setSuperClass(superclass)
+                .setInterfaces(Lists.newArrayList(Splitter.on(",").split(interfaces)))
+                .setStartLine(start)
+                .setEndLine(end)
+                .build();
+    }
+
+    /** Get child classes for superClass
+     * @param superClass the superClass
+     * @return collections of components
+     */
+    private Collection<ClassComponent> getChildClassesFor(String superClass) {
+        Collection<ClassComponent> components = new ArrayList<>();
+        try (Connection connection = this.dataSource.getConnection()) {
+            try (PreparedStatement findClasses = connection.prepareStatement(SELECT_CHILD_CLASSES)) {
+                findClasses.setString(1, superClass);
+                try (ResultSet queryResult = findClasses.executeQuery()) {
+                    while (queryResult.next()) {
+                        ClassComponent component = parseClassFromQuery(queryResult);
+                        if (component != null) {
+                            components.add(component);
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            log.warn("Can't retrieve components", e);
+        }
+        return components;
+    }
+
 }

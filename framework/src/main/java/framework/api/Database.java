@@ -41,6 +41,14 @@ public class Database {
 	}
 
 	/**
+	 * @return collection of Class components in tree hierarchy, null if connection failed (check the log in that case)
+	 */
+	public static Collection<ClassComponent> getTreeOfClassComponents(String projectKee) {
+		SonarDbClient client = new SonarDbClient(DataSourceProvider.getDataSource());
+		return client.getRootClasses(projectKee);
+	}
+
+	/**
 	 * @param metric the ID of the metric
 	 * @return long term measures of the given metric
 	 */
