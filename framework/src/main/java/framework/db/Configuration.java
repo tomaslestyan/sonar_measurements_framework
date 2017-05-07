@@ -1,7 +1,9 @@
 package main.java.framework.db;
 
 /**
- * ToDo: create javadoc
+ * Database configuration
+ * ToDo: parse Sonarqube confirutaion file
+ * ToDo: test with other DBMS
  *
  * @author Klara Erlebachova
  */
@@ -20,10 +22,11 @@ public class Configuration {
     private String dbPassword = "";
 
     public Configuration() {
-        this.connectionString = "jdbc:postgresql://localhost:5432/sonarqube2";
+    /*  this.connectionString = "jdbc:postgresql://localhost:5432/sonarqube2";
         this.jdbcDriver = "org.postgresql.Driver";
         this.dbUser = "postgres";
         this.dbPassword = "heslo";
+     */
 
     }
 

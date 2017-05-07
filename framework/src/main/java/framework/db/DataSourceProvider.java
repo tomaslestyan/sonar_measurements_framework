@@ -3,7 +3,7 @@ package main.java.framework.db;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * ToDo: create javadoc
+ * Provides HikariDataSource
  *
  * @author Klara Erlebachova
  */
@@ -19,7 +19,7 @@ public class DataSourceProvider {
     public synchronized static final HikariDataSource getDataSource() {
         if (hikari == null) {
             if (DataSourceProvider.configuration == null) {
-                throw new RuntimeException("Configuration ..."); // ToDo
+                throw new RuntimeException("Configuration is not set");
             }
             hikari = createDataSource(DataSourceProvider.configuration);
         }

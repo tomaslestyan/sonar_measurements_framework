@@ -4,36 +4,32 @@
  */
 package main.java.framework.db;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
+import com.zaxxer.hikari.HikariDataSource;
+import main.java.framework.api.components.ClassComponent;
+import main.java.framework.api.components.IComponent;
+import main.java.framework.api.components.MethodComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sonar.api.measures.Metric;
+
 import java.io.Serializable;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.UUID;
 
-import com.zaxxer.hikari.HikariDataSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.sonar.api.measures.Metric;
-
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
-
-import main.java.framework.api.components.ClassComponent;
-import main.java.framework.api.components.IComponent;
-import main.java.framework.api.components.MethodComponent;
-
 /**
- * Client to access the SonarQube H2 database
+ * Client to access the Sonarqube database
  *
  * @author Tomas Lestyan
  * @author Klara Erlebachova

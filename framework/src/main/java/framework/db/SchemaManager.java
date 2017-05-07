@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
- * ToDo: create javadoc
+ * Schema manager for creating database schema
  *
  * @author Klara Erlebachova
  */
