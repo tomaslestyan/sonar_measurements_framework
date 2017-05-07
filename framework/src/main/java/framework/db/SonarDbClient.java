@@ -181,12 +181,12 @@ public class SonarDbClient {
     /** Get classes from classes for project in tree hierarchy
      * @return collections of components
      */
-    public Collection<ClassComponent> getRootClasses(String projectKee) {
+    public Collection<ClassComponent> getRootClasses(String projectKey) {
         Collection<ClassComponent> components = new ArrayList<>();
         try (Connection connection = this.dataSource.getConnection()) {
             try (PreparedStatement findRootClasses = connection.prepareStatement(SELECT_ROOT_CLASSES)) {
-                findRootClasses.setString(1, projectKee);
-                findRootClasses.setString(2, projectKee);
+                findRootClasses.setString(1, projectKey);
+                findRootClasses.setString(2, projectKey);
                 try (ResultSet queryResult = findRootClasses.executeQuery()) {
                     while (queryResult.next()) {
                         ClassComponent component = parseClassFromQuery(queryResult);
