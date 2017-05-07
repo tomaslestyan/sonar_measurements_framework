@@ -74,13 +74,12 @@ public class SonarDbClient {
      * @return <code>true</code> if tables was created or the were created before, <code>false</code> otherwise
      */
     public boolean saveRecentMeasuresToMeasures() {
-        try (Connection connection = this.dataSource.getConnection();
-         Statement st = connection.createStatement()) {
-            st.executeUpdate(
-                    COPY_RECENT_MEASURES_TO_MEASURES +
-                    EMPTY_RECENT_MEASURES);
-            st.close();
-            connection.close();
+        try (Connection connection = this.dataSource.getConnection()) {
+            try (Statement st = connection.createStatement()) {
+                st.executeUpdate(
+                        COPY_RECENT_MEASURES_TO_MEASURES +
+                                EMPTY_RECENT_MEASURES);
+            }
         } catch (SQLException e) {
             log.warn("Can't save recent measures to measures", e);
             return false;
@@ -107,58 +106,55 @@ public class SonarDbClient {
         StringJoiner interfaceJoiner = new StringJoiner(",");
         interfaces.forEach(interfaceJoiner::add);
 
-        try (Connection connection = this.dataSource.getConnection();
-         PreparedStatement findComponent = connection.prepareStatement(FIND_COMPONENT)) {
-            // start transaction
-            connection.setAutoCommit(false);
+        try (Connection connection = this.dataSource.getConnection()) {
+            try (PreparedStatement findComponent = connection.prepareStatement(FIND_COMPONENT)) {
+                // start transaction
+                connection.setAutoCommit(false);
 
-            findComponent.setString(1, id);
-            ResultSet component = findComponent.executeQuery();
-            if (component.next()) {
-                try (PreparedStatement updateComponent = connection.prepareStatement(UPDATE_COMPONENT))
-                {
-                    updateComponent.setString(1, project);
-                    updateComponent.setString(2, fileID);
-                    updateComponent.setString(3, parent);
-                    updateComponent.setInt(4, type);
-                    updateComponent.setString(5, packageName);
-                    updateComponent.setString(6, superClass);
-                    updateComponent.setString(7, interfaceJoiner.toString());
-                    updateComponent.setInt(8, startLine);
-                    updateComponent.setInt(9, endLine);
-                    updateComponent.setString(10, id);
-                    updateComponent.execute();
+                findComponent.setString(1, id);
+                try (ResultSet component = findComponent.executeQuery()) {
+                    if (component.next()) {
+                        try (PreparedStatement updateComponent = connection.prepareStatement(UPDATE_COMPONENT)) {
+                            updateComponent.setString(1, project);
+                            updateComponent.setString(2, fileID);
+                            updateComponent.setString(3, parent);
+                            updateComponent.setInt(4, type);
+                            updateComponent.setString(5, packageName);
+                            updateComponent.setString(6, superClass);
+                            updateComponent.setString(7, interfaceJoiner.toString());
+                            updateComponent.setInt(8, startLine);
+                            updateComponent.setInt(9, endLine);
+                            updateComponent.setString(10, id);
+                            updateComponent.execute();
 
-                }  catch (SQLException e) {
-                    log.warn("Can't update the value of component: " + id, e);
-                    return;
+                        } catch (SQLException e) {
+                            log.warn("Can't update the value of component: " + id, e);
+                            return;
+                        }
+                    } else {
+                        try (PreparedStatement insertComponent = connection.prepareStatement(INSERT_COMPONENT)) {
+                            insertComponent.setString(1, id);
+                            insertComponent.setString(2, project);
+                            insertComponent.setString(3, fileID);
+                            insertComponent.setString(4, parent);
+                            insertComponent.setInt(5, type);
+                            insertComponent.setString(6, packageName);
+                            insertComponent.setString(7, superClass);
+                            insertComponent.setString(8, interfaceJoiner.toString());
+                            insertComponent.setInt(9, startLine);
+                            insertComponent.setInt(10, endLine);
+                            insertComponent.execute();
+
+                        } catch (SQLException e) {
+                            log.warn("Can't save the value of component: " + id, e);
+                            return;
+                        }
+                    }
                 }
+                // commit transaction
+                connection.commit();
+                connection.setAutoCommit(true);
             }
-            else {
-                try (PreparedStatement insertComponent = connection.prepareStatement(INSERT_COMPONENT)) {
-                    insertComponent.setString(1, id);
-                    insertComponent.setString(2, project);
-                    insertComponent.setString(3, fileID);
-                    insertComponent.setString(4, parent);
-                    insertComponent.setInt(5, type);
-                    insertComponent.setString(6, packageName);
-                    insertComponent.setString(7, superClass);
-                    insertComponent.setString(8, interfaceJoiner.toString());
-                    insertComponent.setInt(9, startLine);
-                    insertComponent.setInt(10, endLine);
-                    insertComponent.execute();
-
-                } catch (SQLException e) {
-                    log.warn("Can't save the value of component: " + id, e);
-                    return;
-                }
-            }
-            component.close();
-            // commit transaction
-            connection.commit();
-            connection.setAutoCommit(true);
-            connection.close();
-
         } catch (SQLException e) {
             log.warn("Can't find component: " + id, e);
             return;
@@ -173,14 +169,14 @@ public class SonarDbClient {
      * @param value
      */
     public void saveMeasure(Metric<? extends Serializable> metric, String componentID, int value) {
-        try (Connection connection = this.dataSource.getConnection();
-         PreparedStatement saveMeasure = connection.prepareStatement(SAVE_MEASURE)) {
-            saveMeasure.setString(1, UUID.randomUUID().toString());
-            saveMeasure.setInt(2, value);
-            saveMeasure.setString(3, componentID);
-            saveMeasure.setString(4, metric.getKey());
-            saveMeasure.execute();
-            connection.close();
+        try (Connection connection = this.dataSource.getConnection()) {
+            try (PreparedStatement saveMeasure = connection.prepareStatement(SAVE_MEASURE)) {
+                saveMeasure.setString(1, UUID.randomUUID().toString());
+                saveMeasure.setInt(2, value);
+                saveMeasure.setString(3, componentID);
+                saveMeasure.setString(4, metric.getKey());
+                saveMeasure.execute();
+            }
         } catch (SQLException e) {
             log.warn("Can't save the measurement for metric: " + metric.getKey(), e);
         }
@@ -196,20 +192,20 @@ public class SonarDbClient {
         Collection<IComponent> components = new ArrayList<>();
 
         String selectSql = parent == null ? SELECT_ALL_COMPONENTS : SELECT_COMPONENTS_BY_PARENT;
-        try (Connection connection = this.dataSource.getConnection();
-         PreparedStatement selectComponents = connection.prepareStatement(selectSql)) {
-            if (parent != null) {
-                selectComponents.setString(1, parent);
-            }
-            ResultSet queryResult = selectComponents.executeQuery();
-            while (queryResult.next()) {
-                IComponent component = parseComponentFromQuery(queryResult);
-                if (component != null) {
-                    components.add(component);
+        try (Connection connection = this.dataSource.getConnection()) {
+            try (PreparedStatement selectComponents = connection.prepareStatement(selectSql)) {
+                if (parent != null) {
+                    selectComponents.setString(1, parent);
+                }
+                try (ResultSet queryResult = selectComponents.executeQuery()) {
+                    while (queryResult.next()) {
+                        IComponent component = parseComponentFromQuery(queryResult);
+                        if (component != null) {
+                            components.add(component);
+                        }
+                    }
                 }
             }
-            queryResult.close();
-            connection.close();
         } catch (SQLException e) {
             log.warn("Can't retrieve components", e);
         }
@@ -274,13 +270,13 @@ public class SonarDbClient {
             try (PreparedStatement selectMeasures = connection.prepareStatement(SELECT_RECENT_MEASURES_FOR_COMPONENT)) {
                 Map<String, Integer> measures = new HashMap<>();
                 selectMeasures.setString(1, id);
-                ResultSet queryResult = selectMeasures.executeQuery();
-                while (queryResult.next()) {
-                    String metric = queryResult.getString("Metricsid");
-                    int value = queryResult.getInt("value");
-                    measures.put(metric, Integer.valueOf(value));
+                try (ResultSet queryResult = selectMeasures.executeQuery()) {
+                    while (queryResult.next()) {
+                        String metric = queryResult.getString("Metricsid");
+                        int value = queryResult.getInt("value");
+                        measures.put(metric, Integer.valueOf(value));
+                    }
                 }
-                queryResult.close();
                 return measures;
             }
         } catch (SQLException e) {
@@ -296,19 +292,18 @@ public class SonarDbClient {
      * @return measures
      */
     public List<Integer> getMeasures(String metric) {
-        try (Connection connection = this.dataSource.getConnection();
-         PreparedStatement selectMeasures = connection.prepareStatement(SELECT_MEASURES_FOR_METRIC);) {
-            List<Integer> measures = new ArrayList<>();
-
-            selectMeasures.setString(1, metric);
-            ResultSet queryResult = selectMeasures.executeQuery();
-            while (queryResult.next()) {
-                int value = queryResult.getInt("value");
-                measures.add(Integer.valueOf(value));
+        try (Connection connection = this.dataSource.getConnection()) {
+            try (PreparedStatement selectMeasures = connection.prepareStatement(SELECT_MEASURES_FOR_METRIC)) {
+                List<Integer> measures = new ArrayList<>();
+                selectMeasures.setString(1, metric);
+                try (ResultSet queryResult = selectMeasures.executeQuery()) {
+                    while (queryResult.next()) {
+                        int value = queryResult.getInt("value");
+                        measures.add(Integer.valueOf(value));
+                    }
+                }
+                return measures;
             }
-            queryResult.close();
-            connection.close();
-            return measures;
         } catch (SQLException e) {
             log.warn("Can't retrieve measures", e);
         }

@@ -53,11 +53,10 @@ public class SchemaManager {
      * @return <code>true</code> if tables was created or the were created before, <code>false</code> otherwise
      */
     public boolean createTables() {
-        try (Connection connection = this.dataSource.getConnection();
-             Statement st = connection.createStatement()) {
-            st.executeUpdate(CREATE_COMPONENTS + CREATE_MEASURES + CREATE_RECENT_MEASURES);
-            st.close();
-            connection.close();
+        try (Connection connection = this.dataSource.getConnection()) {
+            try (Statement st = connection.createStatement()) {
+                st.executeUpdate(CREATE_COMPONENTS + CREATE_MEASURES + CREATE_RECENT_MEASURES);
+            }
         } catch (SQLException e) {
             log.warn("Can't create the plugin tables", e);
             return false;
@@ -69,15 +68,14 @@ public class SchemaManager {
      * Drop mandatory tables in Sonar DB
      */
     public void dropTables() {
-        try (Connection connection = this.dataSource.getConnection();
-             Statement st = connection.createStatement()) {
-            st.executeUpdate(
-                    "DROP TABLE  Measurement_Framework_Measures; " +
-                            "DROP TABLE Measurement_Framework_Recent_Measures; " +
-                            "DROP TABLE Measurement_Framework_Components;"
-            );
-            st.close();
-            connection.close();
+        try (Connection connection = this.dataSource.getConnection()) {
+            try (Statement st = connection.createStatement()) {
+                st.executeUpdate(
+                        "DROP TABLE  Measurement_Framework_Measures; " +
+                                "DROP TABLE Measurement_Framework_Recent_Measures; " +
+                                "DROP TABLE Measurement_Framework_Components;"
+                );
+            }
         } catch (SQLException e) {
             log.warn("Can't drop tables", e);
         }
