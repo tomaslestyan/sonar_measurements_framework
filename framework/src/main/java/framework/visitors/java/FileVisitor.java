@@ -142,9 +142,6 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 	 */
 	private List<String> getImports() {
 		List<ImportClauseTree> imports = context.getTree().imports();
-		for (ImportClauseTree i : imports) {
-			i.s
-		}
 		return imports.stream().map(x -> x.lastToken().text()).collect(Collectors.toList());
 	}
 
