@@ -42,6 +42,8 @@ public class Builder {
 	private int startLine;
 	/** The ending line of the component */
 	private int endLine;
+	/** The list of children of the class component */
+	private Collection<ClassComponent> childrenClasses;
 
 	/**
 	 * Constructor
@@ -150,6 +152,11 @@ public class Builder {
 		return this;
 	}
 
+	public Builder setChildrenClasses(Collection<ClassComponent> childrenClasses) {
+		this.childrenClasses = childrenClasses;
+		return this;
+	}
+
 	/**
 	 * @return builded instance of {@link IComponent} or <code>null</code> if something missing
 	 */
@@ -162,7 +169,7 @@ public class Builder {
 			break;
 		case CLASS:
 			// TODO check required parameters
-			component =new ClassComponent(id, sonarComponentID, fileKey, packageName, parentClass, superClass, interfaces, children, measures, startLine, endLine);
+			component =new ClassComponent(id, sonarComponentID, fileKey, packageName, parentClass, superClass, interfaces, children, measures, startLine, endLine, childrenClasses);
 			break;
 		default:
 			component = null;

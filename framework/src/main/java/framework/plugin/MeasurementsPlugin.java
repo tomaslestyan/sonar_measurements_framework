@@ -6,6 +6,7 @@ package main.java.framework.plugin;
 
 import main.java.framework.db.Configuration;
 import main.java.framework.db.DataSourceProvider;
+import main.java.framework.db.SaveMetricsClient;
 import main.java.framework.db.SchemaManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,7 @@ public class MeasurementsPlugin implements Plugin {
 		schemaManager.createTables();
 
 
-		SonarDbClient client = new SonarDbClient(DataSourceProvider.getDataSource());
+		SaveMetricsClient client = new SaveMetricsClient(DataSourceProvider.getDataSource());
 		client.saveRecentMeasuresToMeasures();
 	}
 

@@ -22,6 +22,9 @@ public class ClassComponent extends AComponent {
 	private String superClass;
 	/** The list of interface classes of the class component, for other components should be <code>null</code> or empty */
 	private Collection<String> interfaces;
+	/** The list of children of the class component */
+	private Collection<ClassComponent> children;
+
 
 	/**
 	 * Constructor
@@ -39,11 +42,13 @@ public class ClassComponent extends AComponent {
 	 * @param startLine 
 	 */
 	ClassComponent(String id, String sonarComponentID, String fileKey, String packageName, String parentClass, String superClass, Collection<String> interfaces, Collection<IComponent> children,
-			Map<String, Integer> measures, int startLine, int endLine) {
+			Map<String, Integer> measures, int startLine, int endLine, Collection<ClassComponent> childrenClasses) {
 		super(id, sonarComponentID, fileKey, parentClass, Scope.CLASS, children, measures, startLine, endLine);
 		this.interfaces = (interfaces == null) ? Collections.emptyList() : interfaces;
 		this.superClass = superClass;
 		this.packageName = packageName;
+		this.children = childrenClasses;
+
 	}
 
 	/**
@@ -72,5 +77,10 @@ public class ClassComponent extends AComponent {
 	 */
 	public Collection<String> getInterfaces() {
 		return interfaces;
+	}
+
+
+	public Collection<ClassComponent> getChildren() {
+		return children;
 	}
 }
