@@ -8,8 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import main.java.framework.db.DataSourceProvider;
-import main.java.framework.db.SaveMetricsClient;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.sonar.api.batch.Phase;
 import org.sonar.check.Rule;
@@ -18,6 +16,7 @@ import org.sonar.plugins.java.api.JavaFileScannerContext;
 import org.sonar.plugins.java.api.tree.BaseTreeVisitor;
 import org.sonar.plugins.java.api.tree.ClassTree;
 import org.sonar.plugins.java.api.tree.CompilationUnitTree;
+import org.sonar.plugins.java.api.tree.ImportClauseTree;
 import org.sonar.plugins.java.api.tree.ListTree;
 import org.sonar.plugins.java.api.tree.MethodTree;
 import org.sonar.plugins.java.api.tree.Tree;
@@ -28,7 +27,8 @@ import main.java.framework.api.ICommonVisitor;
 import main.java.framework.api.Language;
 import main.java.framework.api.Scope;
 import main.java.framework.api.metrics.MetricsRegister;
-import main.java.framework.db.SonarDbClient;
+import main.java.framework.db.DataSourceProvider;
+import main.java.framework.db.SaveMetricsClient;
 
 /**
  * Class for visiting Java files. The purpose of the class is to visit each class and method and store information about this components including measures of available metrics.
@@ -78,15 +78,15 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 	 */
 	@Override
 	public void visitClass(ClassTree tree) {
-		List<String> imports = getImports();
-		int line = tree.declarationKeyword().line();
+		int line = tree.firstToken().line();
 		int endLine = tree.lastToken().line();
 		SaveMetricsClient client = new SaveMetricsClient(DataSourceProvider.getDataSource());
 		String componentID = context.getFileKey() + "->" + tree.simpleName().name();
 		TypeTree superClass = tree.superClass();
 		ListTree<TypeTree> superInterfaces = tree.superInterfaces();
 		client.saveComponent(componentID, context.getFileKey(), project, getParentID(tree), 
-				Scope.CLASS.getValue(), getPackageName(), getClassName(superClass), superInterfaces.stream().map(x -> getClassName(x)).collect(Collectors.toList()), line, endLine);
+				Scope.CLASS.getValue(), getPackageName(), getClassName(superClass), superInterfaces.stream().map(x -> 
+				getClassName(x)).collect(Collectors.toList()), line, endLine);
 		saveMetrics(tree, componentID, Scope.CLASS);
 		super.visitClass(tree);
 	}
@@ -141,7 +141,11 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 	 * @return
 	 */
 	private List<String> getImports() {
-		return context.getTree().imports().stream().map(x -> x.firstToken().text()).collect(Collectors.toList());
+		List<ImportClauseTree> imports = context.getTree().imports();
+		for (ImportClauseTree i : imports) {
+			i.s
+		}
+		return imports.stream().map(x -> x.lastToken().text()).collect(Collectors.toList());
 	}
 
 	/**
@@ -157,7 +161,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 	 */
 	private String getClassName(TypeTree tree) {
 		if ((tree != null) && tree.is(Kind.IDENTIFIER)) {
-			return tree.firstToken().text();
+			return tree.symbolType().fullyQualifiedName();
 		}
 		return null;
 	}
