@@ -8,16 +8,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import main.java.framework.db.DataSourceProvider;
-import main.java.framework.db.SaveMetricsClient;
 import org.apache.commons.lang.reflect.FieldUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.Phase;
 import org.sonar.check.Rule;
 import org.sonar.plugins.java.api.JavaFileScanner;
 import org.sonar.plugins.java.api.JavaFileScannerContext;
+import org.sonar.plugins.java.api.semantic.Symbol;
 import org.sonar.plugins.java.api.tree.BaseTreeVisitor;
 import org.sonar.plugins.java.api.tree.ClassTree;
 import org.sonar.plugins.java.api.tree.CompilationUnitTree;
+import org.sonar.plugins.java.api.tree.ImportClauseTree;
 import org.sonar.plugins.java.api.tree.ListTree;
 import org.sonar.plugins.java.api.tree.MethodTree;
 import org.sonar.plugins.java.api.tree.Tree;
@@ -28,7 +30,8 @@ import main.java.framework.api.ICommonVisitor;
 import main.java.framework.api.Language;
 import main.java.framework.api.Scope;
 import main.java.framework.api.metrics.MetricsRegister;
-import main.java.framework.db.SonarDbClient;
+import main.java.framework.db.DataSourceProvider;
+import main.java.framework.db.SaveMetricsClient;
 
 /**
  * Class for visiting Java files. The purpose of the class is to visit each class and method and store information about this components including measures of available metrics.
@@ -38,8 +41,11 @@ import main.java.framework.db.SonarDbClient;
 @Rule(key = "framework", name="framework", description="blank rule")
 public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 
+	/** The logger object */
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	/** The scanner context */
 	private JavaFileScannerContext context;
+	/** The project of the scanned file */
 	private String project;
 
 	/* (non-Javadoc)
@@ -78,18 +84,21 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 	 */
 	@Override
 	public void visitClass(ClassTree tree) {
-		List<String> imports = getImports();
-		int line = tree.declarationKeyword().line();
+		int line = tree.firstToken().line();
 		int endLine = tree.lastToken().line();
 		SaveMetricsClient client = new SaveMetricsClient(DataSourceProvider.getDataSource());
-		String componentID = context.getFileKey() + "->" + tree.simpleName().name();
+		String fileKey = context.getFileKey();
+		String simpleName = extractTreeSimpleName(tree.symbol());
+		String componentID = fileKey + "->" + simpleName;
 		TypeTree superClass = tree.superClass();
 		ListTree<TypeTree> superInterfaces = tree.superInterfaces();
-		client.saveComponent(componentID, context.getFileKey(), project, getParentID(tree), 
-				Scope.CLASS.getValue(), getPackageName(), getClassName(superClass), superInterfaces.stream().map(x -> getClassName(x)).collect(Collectors.toList()), line, endLine);
+		client.saveComponent(componentID, fileKey, project, getParentID(tree), 
+				Scope.CLASS.getValue(), getPackageName(), getClassName(superClass), superInterfaces.stream().map(x -> 
+				getClassName(x)).collect(Collectors.toList()), line, endLine);
 		saveMetrics(tree, componentID, Scope.CLASS);
 		super.visitClass(tree);
 	}
+
 
 	/* (non-Javadoc)
 	 * @see org.sonar.plugins.java.api.tree.BaseTreeVisitor#visitMethod(org.sonar.plugins.java.api.tree.MethodTree)
@@ -97,7 +106,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 	@Override
 	public void visitMethod(MethodTree tree) {
 		SaveMetricsClient client = new SaveMetricsClient(DataSourceProvider.getDataSource());
-		String componentID = context.getFileKey() + "->" + tree.simpleName().name();
+		String componentID = context.getFileKey() + "->" + extractTreeSimpleName(tree.symbol());
 		getParentID(tree);
 		client.saveComponent(componentID, context.getFileKey(), project, getParentID(tree), 
 				Scope.METHOD.getValue(), getPackageName(), null, Collections.emptyList(), tree.firstToken().line(), tree.lastToken().line());
@@ -141,7 +150,8 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 	 * @return
 	 */
 	private List<String> getImports() {
-		return context.getTree().imports().stream().map(x -> x.firstToken().text()).collect(Collectors.toList());
+		List<ImportClauseTree> imports = context.getTree().imports();
+		return imports.stream().map(x -> x.lastToken().text()).collect(Collectors.toList());
 	}
 
 	/**
@@ -155,9 +165,23 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 	 * @param tree
 	 * @return
 	 */
+	private String extractTreeSimpleName(Symbol symbol) {
+		String simpleName = null;
+		if (symbol != null) {
+			simpleName = symbol.name();
+		}  else {
+			log.warn("No symbol name found for symbol" + symbol);
+		}
+		return simpleName;
+	}
+
+	/**
+	 * @param tree
+	 * @return
+	 */
 	private String getClassName(TypeTree tree) {
 		if ((tree != null) && tree.is(Kind.IDENTIFIER)) {
-			return tree.firstToken().text();
+			return tree.symbolType().fullyQualifiedName();
 		}
 		return null;
 	}
