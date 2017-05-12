@@ -9,10 +9,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.reflect.FieldUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.Phase;
 import org.sonar.check.Rule;
 import org.sonar.plugins.java.api.JavaFileScanner;
 import org.sonar.plugins.java.api.JavaFileScannerContext;
+import org.sonar.plugins.java.api.semantic.Symbol;
 import org.sonar.plugins.java.api.tree.BaseTreeVisitor;
 import org.sonar.plugins.java.api.tree.ClassTree;
 import org.sonar.plugins.java.api.tree.CompilationUnitTree;
@@ -38,8 +41,11 @@ import main.java.framework.db.SaveMetricsClient;
 @Rule(key = "framework", name="framework", description="blank rule")
 public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 
+	/** The logger object */
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	/** The scanner context */
 	private JavaFileScannerContext context;
+	/** The project of the scanned file */
 	private String project;
 
 	/* (non-Javadoc)
@@ -81,15 +87,18 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		int line = tree.firstToken().line();
 		int endLine = tree.lastToken().line();
 		SaveMetricsClient client = new SaveMetricsClient(DataSourceProvider.getDataSource());
-		String componentID = context.getFileKey() + "->" + tree.simpleName().name();
+		String fileKey = context.getFileKey();
+		String simpleName = extractTreeSimpleName(tree.symbol());
+		String componentID = fileKey + "->" + simpleName;
 		TypeTree superClass = tree.superClass();
 		ListTree<TypeTree> superInterfaces = tree.superInterfaces();
-		client.saveComponent(componentID, context.getFileKey(), project, getParentID(tree), 
+		client.saveComponent(componentID, fileKey, project, getParentID(tree), 
 				Scope.CLASS.getValue(), getPackageName(), getClassName(superClass), superInterfaces.stream().map(x -> 
 				getClassName(x)).collect(Collectors.toList()), line, endLine);
 		saveMetrics(tree, componentID, Scope.CLASS);
 		super.visitClass(tree);
 	}
+
 
 	/* (non-Javadoc)
 	 * @see org.sonar.plugins.java.api.tree.BaseTreeVisitor#visitMethod(org.sonar.plugins.java.api.tree.MethodTree)
@@ -97,7 +106,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 	@Override
 	public void visitMethod(MethodTree tree) {
 		SaveMetricsClient client = new SaveMetricsClient(DataSourceProvider.getDataSource());
-		String componentID = context.getFileKey() + "->" + tree.simpleName().name();
+		String componentID = context.getFileKey() + "->" + extractTreeSimpleName(tree.symbol());
 		getParentID(tree);
 		client.saveComponent(componentID, context.getFileKey(), project, getParentID(tree), 
 				Scope.METHOD.getValue(), getPackageName(), null, Collections.emptyList(), tree.firstToken().line(), tree.lastToken().line());
@@ -150,6 +159,20 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 	 */
 	private String getPackageName() {
 		return context.getTree().packageDeclaration().packageName().firstToken().text();
+	}
+
+	/**
+	 * @param tree
+	 * @return
+	 */
+	private String extractTreeSimpleName(Symbol symbol) {
+		String simpleName = null;
+		if (symbol != null) {
+			simpleName = symbol.name();
+		}  else {
+			log.warn("No symbol name found for symbol" + symbol);
+		}
+		return simpleName;
 	}
 
 	/**
