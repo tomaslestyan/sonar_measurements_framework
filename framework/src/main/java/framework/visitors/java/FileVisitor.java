@@ -19,9 +19,11 @@ import org.sonar.plugins.java.api.semantic.Symbol;
 import org.sonar.plugins.java.api.tree.BaseTreeVisitor;
 import org.sonar.plugins.java.api.tree.ClassTree;
 import org.sonar.plugins.java.api.tree.CompilationUnitTree;
+import org.sonar.plugins.java.api.tree.IdentifierTree;
 import org.sonar.plugins.java.api.tree.ImportClauseTree;
 import org.sonar.plugins.java.api.tree.ListTree;
 import org.sonar.plugins.java.api.tree.MethodTree;
+import org.sonar.plugins.java.api.tree.ParameterizedTypeTree;
 import org.sonar.plugins.java.api.tree.Tree;
 import org.sonar.plugins.java.api.tree.Tree.Kind;
 import org.sonar.plugins.java.api.tree.TypeTree;
@@ -93,8 +95,8 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		TypeTree superClass = tree.superClass();
 		ListTree<TypeTree> superInterfaces = tree.superInterfaces();
 		client.saveComponent(componentID, fileKey, project, getParentID(tree), 
-				Scope.CLASS.getValue(), getPackageName(), getClassName(superClass), superInterfaces.stream().map(x -> 
-				getClassName(x)).collect(Collectors.toList()), line, endLine);
+				Scope.CLASS.getValue(), getPackageName(), extractFullyQualifiedName(superClass), superInterfaces.stream().map(x -> 
+				extractFullyQualifiedName(x)).collect(Collectors.toList()), line, endLine);
 		saveMetrics(tree, componentID, Scope.CLASS);
 		super.visitClass(tree);
 	}
@@ -149,9 +151,8 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 	/**
 	 * @return
 	 */
-	private List<String> getImports() {
-		List<ImportClauseTree> imports = context.getTree().imports();
-		return imports.stream().map(x -> x.lastToken().text()).collect(Collectors.toList());
+	private List<ImportClauseTree> getImports() {
+		return context.getTree().imports();
 	}
 
 	/**
@@ -159,6 +160,17 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 	 */
 	private String getPackageName() {
 		return context.getTree().packageDeclaration().packageName().firstToken().text();
+	}
+
+	/**
+	 * @param tree
+	 * @return fully qualified name of the given type
+	 */
+	private String extractFullyQualifiedName(TypeTree tree) {
+		String simpleName = extractTreeSimpleName(tree);
+		List<ImportClauseTree> imports = getImports();
+		String fqName = simpleName; // TODO fqName shold be constructed from belonging import or class fq name if there are in same package
+		return fqName;
 	}
 
 	/**
@@ -179,10 +191,23 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 	 * @param tree
 	 * @return
 	 */
-	private String getClassName(TypeTree tree) {
-		if ((tree != null) && tree.is(Kind.IDENTIFIER)) {
-			return tree.symbolType().fullyQualifiedName();
+	private String extractTreeSimpleName(TypeTree tree) {
+		String name = null;
+		if (tree != null) {
+			switch (tree.kind()) {
+			case IDENTIFIER:
+				name = ((IdentifierTree)tree).name();
+				break;
+			case PARAMETERIZED_TYPE:
+				name = ((ParameterizedTypeTree)tree).type().toString();
+				break;
+			default:
+				log.warn("No symbol name found for symbol" + tree.symbolType());
+				break;
+			}
 		}
-		return null;
+		return name;
 	}
+
+
 }
