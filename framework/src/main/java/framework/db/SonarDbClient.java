@@ -10,6 +10,8 @@ import com.zaxxer.hikari.HikariDataSource;
 import main.java.framework.api.components.ClassComponent;
 import main.java.framework.api.components.IComponent;
 import main.java.framework.api.components.MethodComponent;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +46,9 @@ public class SonarDbClient {
     private static final String SELECT_CHILD_CLASSES = "SELECT * FROM Measurement_Framework_Components WHERE superclass = ? AND type = 1";
     private static final String SELECT_ROOT_CLASSES = "SELECT * FROM Measurement_Framework_Components WHERE (superclass IS NULL OR superclass NOT IN (SELECT id FROM Measurement_Framework_Components WHERE projectKey = ?)) AND TYPE = 1 AND projectKey = ?";
 
+    private static final String SELECT_BOUNDARIES_FOR_METRIC = "SELECT min(m.value) as min_value, max(m.value) as max_value FROM measurement_framework_recent_measures m " +
+            "JOIN measurement_framework_components c on (m.componentsid = c.id) " +
+            "WHERE c.projectkey = ? and m.metricsid = ? and c.type = 1";
 
     /**
      * Constructor
@@ -260,4 +265,22 @@ public class SonarDbClient {
         return components;
     }
 
+    public Pair<Integer, Integer> getBoundariesForMetric(String projectKey, String metric) {
+        try (Connection connection = this.dataSource.getConnection()) {
+            try (PreparedStatement selectBoundaries = connection.prepareStatement(SELECT_BOUNDARIES_FOR_METRIC)) {
+                selectBoundaries.setString(1, projectKey);
+                selectBoundaries.setString(2, metric);
+                try (ResultSet queryResult = selectBoundaries.executeQuery()) {
+                    if (queryResult.next()) {
+                        int minValue = queryResult.getInt("min_value");
+                        int maxValue = queryResult.getInt("max_value");
+                        return new ImmutablePair<>(minValue, maxValue);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            log.warn("Can't retrieve boundaries for metric", e);
+        }
+        return null;
+    }
 }
