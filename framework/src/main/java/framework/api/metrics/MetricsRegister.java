@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import main.java.framework.visitors.java.NumberOfMethodsVisitor;
 import org.sonar.api.measures.CoreMetrics;
 import org.sonar.api.measures.Metric;
 import org.sonar.api.measures.Metrics;
@@ -72,6 +73,12 @@ public class MetricsRegister implements Metrics {
 			.setDomain(CoreMetrics.DOMAIN_GENERAL)
 			.create();
 
+	public static final Metric<Integer> NOM = new Metric.Builder("nom", "nom", Metric.ValueType.INT)
+			.setDescription("Number of methods for the class")
+			.setQualitative(false)
+			.setDomain(CoreMetrics.DOMAIN_GENERAL)
+			.create();
+
 	public static final Metric<Integer> ATFD = new Metric.Builder("atfd", "atfd", Metric.ValueType.INT)
 			.setDescription("Access To Foreign Data")
 			.setQualitative(false)
@@ -95,6 +102,7 @@ public class MetricsRegister implements Metrics {
 			.put(CYCLO, Arrays.asList(new ComplexityVisitor()))
 			.put(MAXNESTING, Arrays.asList(new MaxNestingVisitor()))
 			.put(NOA, Arrays.asList(new NumberOfAttributesVisitor()))
+			.put(NOM, Arrays.asList(new NumberOfMethodsVisitor()))
 			.put(ATFD, Arrays.asList(new DataAccessVisitor(true)))
 			.put(LAA, Arrays.asList(new LocalityOfAttributesVisitor()))
 			.put(FDP, Arrays.asList(new ForeignDataProvidersVisitor()))
@@ -124,7 +132,7 @@ public class MetricsRegister implements Metrics {
 	 * @return TODO
 	 */
 	public static final List<Metric> getFrameworkMetrics() {
-		return asList(LOC, LOC_CLASS, NOAV, CYCLO, MAXNESTING, NOA, LAA, ATFD, FDP);
+		return asList(LOC, LOC_CLASS, NOAV, CYCLO, MAXNESTING, NOA, NOM, LAA, ATFD, FDP);
 	}
 
 	/* (non-Javadoc)
