@@ -122,15 +122,15 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		SaveMetricsClient client = new SaveMetricsClient(DataSourceProvider.getDataSource());
 		int line = tree.firstToken().line();
 		int endLine = tree.lastToken().line();
-		String partntID = null;
+		String parentID = null;
 		if (tree.parent() instanceof ClassTree) {
-			partntID = getClassId((ClassTree) tree.parent());
+			parentID = getClassId((ClassTree) tree.parent());
 		}
 		String fileKey = context.getFileKey();
 		String componentID = getClassId(tree);
 		TypeTree superClass = tree.superClass();
 		ListTree<TypeTree> superInterfaces = tree.superInterfaces();
-		client.saveComponent(componentID, fileKey, project, partntID, 
+		client.saveComponent(componentID, fileKey, project, parentID, 
 				Scope.CLASS.getValue(), packageName, extractFullyQualifiedName(superClass), superInterfaces.stream().map(x -> 
 				extractFullyQualifiedName(x)).collect(Collectors.toList()), line, endLine);
 		saveMetrics(tree, componentID, Scope.CLASS);
@@ -159,9 +159,9 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		SaveMetricsClient client = new SaveMetricsClient(DataSourceProvider.getDataSource());
 		Tree parent = tree.parent();
 		if (parent instanceof ClassTree) {
-			String partntID = getClassId((ClassTree) parent);
-			String componentID = partntID + "->" + getMethodID(tree);
-			client.saveComponent(componentID, context.getFileKey(), project, partntID, Scope.METHOD.getValue(), 
+			String parentID = getClassId((ClassTree) parent);
+			String componentID = parentID + "->" + getMethodID(tree);
+			client.saveComponent(componentID, context.getFileKey(), project, parentID, Scope.METHOD.getValue(), 
 					packageName, null, Collections.emptyList(), tree.firstToken().line(), tree.lastToken().line());
 			saveMetrics(tree, componentID, Scope.METHOD);
 		} else {
