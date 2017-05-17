@@ -14,6 +14,7 @@ import main.java.framework.api.components.ClassComponent;
 import main.java.framework.api.components.IComponent;
 import main.java.framework.db.DataSourceProvider;
 import main.java.framework.db.SonarDbClient;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Class for retrieving information from Sonar DB
@@ -66,6 +67,11 @@ public class Database {
 		SonarDbClient client = new SonarDbClient(DataSourceProvider.getDataSource());
 		metrics.forEach(x -> metricsMeasures.put(x, client.getMeasures(x)));
 		return metricsMeasures;
+	}
+
+	public static Pair<Integer, Integer> getBoundariesFor(String projectKey, String metric) {
+		SonarDbClient client = new SonarDbClient(DataSourceProvider.getDataSource());
+		return client.getBoundariesForMetric(projectKey, metric);
 	}
 
 
