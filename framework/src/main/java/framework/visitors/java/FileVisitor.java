@@ -4,6 +4,7 @@
  */
 package main.java.framework.visitors.java;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -257,7 +258,17 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 				if (fileSystem != null) {
 					Object baseDir  = FieldUtils.readField(fileSystem, "baseDir", true);
 					if (baseDir != null){
-						String dir = (String) FieldUtils.readField(baseDir, "path", true);
+						String dir;
+						Object dirPath = FieldUtils.readField(baseDir, "path", true);
+						if (dirPath instanceof Path){
+							Path projectDirectory = (Path) dirPath;
+							dir = projectDirectory.toString();
+						} else if (dirPath instanceof String){
+							dir = (String) dirPath;
+						} else {
+							return key;
+						}
+
 						key = key.substring(dir.length() + 1);
 						key = key.replace('\\', '/');
 						key = project + ":" + key;
