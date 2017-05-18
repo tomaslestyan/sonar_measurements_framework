@@ -95,7 +95,6 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 	}
 
 	/**
-	 * @param context
 	 * @return 
 	 */
 	private String getProjectKey() {
@@ -126,7 +125,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		if (tree.parent() instanceof ClassTree) {
 			parentID = getClassId((ClassTree) tree.parent());
 		}
-		String fileKey = context.getFileKey();
+		String fileKey = getFileKey();
 		String componentID = getClassId(tree);
 		TypeTree superClass = tree.superClass();
 		ListTree<TypeTree> superInterfaces = tree.superInterfaces();
@@ -161,7 +160,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		if (parent instanceof ClassTree) {
 			String parentID = getClassId((ClassTree) parent);
 			String componentID = parentID + "->" + getMethodID(tree);
-			client.saveComponent(componentID, context.getFileKey(), project, parentID, Scope.METHOD.getValue(), 
+			client.saveComponent(componentID, getFileKey(), project, parentID, Scope.METHOD.getValue(),
 					packageName, null, Collections.emptyList(), tree.firstToken().line(), tree.lastToken().line());
 			saveMetrics(tree, componentID, Scope.METHOD);
 		} else {
@@ -241,5 +240,26 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		return name;
 	}
 
+	private String getFileKey(){
+		String key = context.getFileKey();
+		try {
+			Object sonarComponentsField = FieldUtils.readField(context, "sonarComponents", true);
+			if (sonarComponentsField != null) {
+				Object fileSystem = FieldUtils.readField(sonarComponentsField, "fs", true);
+				if (fileSystem != null) {
+					Object baseDir  = FieldUtils.readField(fileSystem, "baseDir", true);
+					if (baseDir != null){
+						String dir = (String) FieldUtils.readField(baseDir, "path", true);
+						key = key.substring(dir.length() + 1);
+						key = key.replace('\\', '/');
+						key = project + ":" + key;
+					}
+				}
+			}
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		return key;
+	}
 
 }
