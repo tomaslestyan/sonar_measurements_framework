@@ -259,14 +259,16 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 					Object baseDir  = FieldUtils.readField(fileSystem, "baseDir", true);
 					if (baseDir != null){
 						String dir;
-						Object dirPath = FieldUtils.readField(baseDir, "path", true);
-						if (dirPath instanceof Path){
-							Path projectDirectory = (Path) dirPath;
+						if (baseDir instanceof Path){
+							Path projectDirectory = (Path) baseDir;
 							dir = projectDirectory.toString();
-						} else if (dirPath instanceof String){
-							dir = (String) dirPath;
 						} else {
-							return key;
+							Object dirPath = FieldUtils.readField(baseDir, "path", true);
+							if (dirPath instanceof String) {
+								dir = (String) dirPath;
+							} else {
+								return key;
+							}
 						}
 
 						key = key.substring(dir.length() + 1);
