@@ -3,7 +3,6 @@ package main.java.framework.visitors.java;
 import main.java.framework.api.Scope;
 import org.sonar.java.resolve.JavaSymbol;
 import org.sonar.plugins.java.api.semantic.Symbol;
-import org.sonar.plugins.java.api.tree.ClassTree;
 import org.sonar.plugins.java.api.tree.MethodInvocationTree;
 import org.sonar.plugins.java.api.tree.MethodTree;
 import org.sonar.plugins.java.api.tree.Tree;
@@ -24,6 +23,10 @@ public class DistinctCallsVisitor  extends AVisitor{
     private String visitedClass;
     private String visitedMethod;
 
+    public Set<String[]> getEncounteredMethods() {
+        return encounteredMethods;
+    }
+
     public DistinctCallsVisitor() {
         encounteredMethods = new HashSet<>();
     }
@@ -43,18 +46,18 @@ public class DistinctCallsVisitor  extends AVisitor{
 
     @Override
     public void scanTree(Tree tree) {
-        if (tree.parent() instanceof ClassTree){
-            ClassTree classTree = (ClassTree) tree.parent();
-            visitedClass = classTree.symbol().name();
-        } else {
-            visitedClass = "";
-        }
-
         if (tree instanceof MethodTree){
             MethodTree methodTree = (MethodTree) tree;
             visitedMethod = methodTree.symbol().name();
+            Symbol owner = methodTree.symbol().owner();
+            if (owner instanceof JavaSymbol.TypeJavaSymbol){
+                JavaSymbol.TypeJavaSymbol ownerSymbol = (JavaSymbol.TypeJavaSymbol) owner;
+                visitedClass = ownerSymbol.getFullyQualifiedName();
+            } else {
+                visitedClass = methodTree.symbol().owner().name();
+            }
         } else {
-            int wtf = 5;
+            visitedMethod = tree.toString();
         }
         super.scanTree(tree);
     }
@@ -68,7 +71,7 @@ public class DistinctCallsVisitor  extends AVisitor{
             JavaSymbol.TypeJavaSymbol ownerSymbol = (JavaSymbol.TypeJavaSymbol) owner;
             ownerName = ownerSymbol.getFullyQualifiedName();
         } else {
-            ownerName = "";
+            ownerName = owner.name();
         }
 
         String[] credentials = new String[4];

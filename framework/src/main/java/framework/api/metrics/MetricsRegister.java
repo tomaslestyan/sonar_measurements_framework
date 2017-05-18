@@ -92,6 +92,12 @@ public class MetricsRegister implements Metrics {
 			.setDomain(CoreMetrics.DOMAIN_GENERAL)
 			.create();
 
+	public static final Metric<Integer> FANOUT = new Metric.Builder("fanout", "fanout", Metric.ValueType.INT)
+			.setDescription("Number of distinct classes called by a class")
+			.setQualitative(false)
+			.setDomain(CoreMetrics.DOMAIN_GENERAL)
+			.create();
+
 	private static final Map<Metric<? extends Serializable> , Collection<ICommonVisitor>> metricVisitors = ImmutableMap.<Metric<? extends Serializable> , Collection<ICommonVisitor>> builder()
 			.put(LOC, Arrays.asList(new LinesOfCodeVisitor()))
 			.put(LOC_CLASS, Arrays.asList(new ClassLinesOfCodeVisitor()))
@@ -104,6 +110,7 @@ public class MetricsRegister implements Metrics {
 			.put(LAA, Arrays.asList(new LocalityOfAttributesVisitor()))
 			.put(FDP, Arrays.asList(new ForeignDataProvidersVisitor()))
 			.put(CALLS, Arrays.asList(new DistinctCallsVisitor()))
+			.put(FANOUT, Arrays.asList(new FanOutVisitor()))
 			.build();
 
 	/**
@@ -130,7 +137,7 @@ public class MetricsRegister implements Metrics {
 	 * @return TODO
 	 */
 	public static final List<Metric> getFrameworkMetrics() {
-		return asList(LOC, LOC_CLASS, NOAV, CYCLO, MAXNESTING, NOA, NOM, LAA, ATFD, FDP, CALLS);
+		return asList(LOC, LOC_CLASS, NOAV, CYCLO, MAXNESTING, NOA, NOM, LAA, ATFD, FDP, CALLS, FANOUT);
 	}
 
 	/* (non-Javadoc)
