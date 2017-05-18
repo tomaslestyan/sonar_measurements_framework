@@ -33,8 +33,8 @@ public class SaveMetricsClient {
     private HikariDataSource dataSource;
 
     private static final String FIND_COMPONENT = "SELECT * FROM Measurement_Framework_Components WHERE id = ?;";
-    private static final String INSERT_COMPONENT = "INSERT INTO Measurement_Framework_Components (id , projectKey, fileKey, parent, type, package, superClass, interfaces, startLine, endLine) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-    private static final String UPDATE_COMPONENT = "UPDATE Measurement_Framework_Components SET projectKey = ?, fileKey = ?, parent = ?, type = ?, package = ?, superClass = ?, interfaces = ?, startLine = ?, endLine = ? WHERE id = ?;";
+    private static final String INSERT_COMPONENT = "INSERT INTO Measurement_Framework_Components (id, projectKey, fileKey, parent, type, package, fullyQualifiedName,  superClass, interfaces, startLine, endLine) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    private static final String UPDATE_COMPONENT = "UPDATE Measurement_Framework_Components SET projectKey = ?, fileKey = ?, parent = ?, type = ?, package = ?, fullyQualifiedName = ?, superClass = ?, interfaces = ?, startLine = ?, endLine = ? WHERE id = ?;";
 
 
     private static final String COPY_RECENT_MEASURES_TO_MEASURES = "INSERT INTO Measurement_Framework_Measures (id, value , Componentsid, Metricsid) " +
@@ -84,7 +84,7 @@ public class SaveMetricsClient {
      * @param startLine
      * @param endLine
      */
-    public void saveComponent(String id, String fileID, String project, String parent, int type, String packageName, String superClass, Collection<String> interfaces, int startLine, int endLine) {
+    public void saveComponent(String id, String fileID, String project, String parent, int type, String packageName, String fqName, String superClass, Collection<String> interfaces, int startLine, int endLine) {
         log.info("Measurement framework: saving component" + id);
         StringJoiner interfaceJoiner = new StringJoiner(",");
         interfaces.forEach(interfaceJoiner::add);
@@ -103,11 +103,12 @@ public class SaveMetricsClient {
                             updateComponent.setString(3, parent);
                             updateComponent.setInt(4, type);
                             updateComponent.setString(5, packageName);
-                            updateComponent.setString(6, superClass);
-                            updateComponent.setString(7, interfaceJoiner.toString());
-                            updateComponent.setInt(8, startLine);
-                            updateComponent.setInt(9, endLine);
-                            updateComponent.setString(10, id);
+                            updateComponent.setString(6, fqName);
+                            updateComponent.setString(7, superClass);
+                            updateComponent.setString(8, interfaceJoiner.toString());
+                            updateComponent.setInt(9, startLine);
+                            updateComponent.setInt(10, endLine);
+                            updateComponent.setString(11, id);
                             updateComponent.execute();
 
                         } catch (SQLException e) {
@@ -122,10 +123,11 @@ public class SaveMetricsClient {
                             insertComponent.setString(4, parent);
                             insertComponent.setInt(5, type);
                             insertComponent.setString(6, packageName);
-                            insertComponent.setString(7, superClass);
-                            insertComponent.setString(8, interfaceJoiner.toString());
-                            insertComponent.setInt(9, startLine);
-                            insertComponent.setInt(10, endLine);
+                            insertComponent.setString(7, fqName);
+                            insertComponent.setString(8, superClass);
+                            insertComponent.setString(9, interfaceJoiner.toString());
+                            insertComponent.setInt(10, startLine);
+                            insertComponent.setInt(11, endLine);
                             insertComponent.execute();
 
                         } catch (SQLException e) {

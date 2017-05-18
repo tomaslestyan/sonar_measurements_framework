@@ -47,7 +47,7 @@ public class SonarDbClient {
 	private static final String SELECT_MEASURES_FOR_METRIC = "SELECT * FROM Measurement_Framework_Measures WHERE Metricsid = ?;";
 	private static final String SELECT_RECENT_MEASURES_FOR_METRIC = "SELECT * Measurement_Framework_Recent_Measures WHERE Metricsid = ?;";
 	private static final String SELECT_CHILD_CLASSES = "SELECT * FROM Measurement_Framework_Components WHERE superclass = ? AND type = 1";
-	private static final String SELECT_ROOT_CLASSES = "SELECT * FROM Measurement_Framework_Components WHERE (superclass IS NULL OR superclass NOT IN (SELECT id FROM Measurement_Framework_Components WHERE projectKey = ?)) AND TYPE = 1 AND projectKey = ?";
+	private static final String SELECT_ROOT_CLASSES = "SELECT * FROM Measurement_Framework_Components WHERE (superclass IS NULL OR superclass NOT IN (SELECT fullyQualifiedName FROM Measurement_Framework_Components WHERE projectKey = ?)) AND TYPE = 1 AND projectKey = ?";
 	private static final String SELECT_CLASSES_FOR_PROJECT = "SELECT * FROM Measurement_Framework_Components WHERE TYPE = 1 AND parent IS NULL AND projectKey = ?";
 	private static final String SELECT_BOUNDARIES_FOR_METRIC = "SELECT min(m.value) as min_value, max(m.value) as max_value FROM measurement_framework_recent_measures m " +
 			"JOIN measurement_framework_components c on (m.componentsid = c.id) " +
@@ -55,7 +55,7 @@ public class SonarDbClient {
 
 	/**
 	 * Constructor
-	 * @param dataSource 
+	 * @param dataSource
 	 */
 	public SonarDbClient(HikariDataSource dataSource) {
 		this.dataSource = dataSource;
@@ -96,7 +96,7 @@ public class SonarDbClient {
 	}
 
 	/** Get classes from classes for project in tree hierarchy
-	 * @param projectKey 
+	 * @param projectKey
 	 * @return collections of components
 	 */
 	public Collection<ClassComponent> getClassComponentsOfProject(String projectKey) {
@@ -238,7 +238,7 @@ public class SonarDbClient {
 	}
 
 	/** Get classes from classes for project in tree hierarchy
-	 * @param projectKey 
+	 * @param projectKey
 	 * @return collections of components
 	 */
 	public Collection<ClassComponent> getRootClasses(String projectKey) {
@@ -273,7 +273,8 @@ public class SonarDbClient {
 		String fileKey = queryResult.getString("fileKey");
 		String parentID = queryResult.getString("parent");
 		String packageName = queryResult.getString("package");
-		String superclass = queryResult.getString("superclass");
+		String fullyQualifiedName = queryResult.getString("fullyQualifiedName");
+        String superclass = queryResult.getString("superclass");
 		String interfaces = queryResult.getString("interfaces");
 		int start = queryResult.getInt("STARTLINE");
 		int end = queryResult.getInt("ENDLINE");
@@ -285,7 +286,7 @@ public class SonarDbClient {
 				.setFileKey(fileKey)
 				.setParentClass(parentID)
 				.setMeasures(measures)
-				.setChildrenClasses(getChildClassesFor(id))
+				.setChildrenClasses(getChildClassesFor(fullyQualifiedName))
 				.setPackageName(packageName)
 				.setSuperClass(superclass)
 				.setInterfaces(Lists.newArrayList(Splitter.on(",").split(interfaces)))
