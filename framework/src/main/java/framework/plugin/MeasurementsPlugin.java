@@ -4,20 +4,18 @@
  */
 package main.java.framework.plugin;
 
-import main.java.framework.db.Configuration;
-import main.java.framework.db.DataSourceProvider;
-import main.java.framework.db.SaveMetricsClient;
-import main.java.framework.db.SchemaManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.Plugin;
 
 import main.java.framework.api.metrics.MetricsRegister;
-import main.java.framework.db.SonarDbClient;
+import main.java.framework.db.Configuration;
+import main.java.framework.db.DataSourceProvider;
+import main.java.framework.db.SaveMetricsClient;
+import main.java.framework.db.SchemaManager;
 
 /**
- * The plugin definition
- * TODO under construction - add each new class
+ * The plugin definition.
  * @author Tomas Lestyan
  */
 public class MeasurementsPlugin implements Plugin {
@@ -33,14 +31,10 @@ public class MeasurementsPlugin implements Plugin {
 		// get database configuration
 		Configuration configuration = Configuration.INSTANCE;
 		DataSourceProvider.setConfiguration(configuration);
-
-
 		// create tables if runs first time
 		SchemaManager schemaManager = new SchemaManager(DataSourceProvider.getDataSource());
-		//		schemaManager.dropTables(); //DEBUG ONLY
+		// schemaManager.dropTables(); //DEBUG ONLY
 		schemaManager.createTables();
-
-
 		SaveMetricsClient client = new SaveMetricsClient(DataSourceProvider.getDataSource());
 		client.saveRecentMeasuresToMeasures();
 	}
