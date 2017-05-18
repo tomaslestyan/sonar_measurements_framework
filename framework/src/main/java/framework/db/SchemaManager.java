@@ -27,6 +27,7 @@ public class SchemaManager {
             "parent varchar(255), " +
             "type int NOT NULL,  " +
             "package varchar(255) NOT NULL, " +
+            "fullyQualifiedName varchar(255), " +
             "superClass varchar(255), " +
             "interfaces varchar(65536) NOT NULL, " +
             "startLine int, " +
