@@ -257,36 +257,47 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
         return name;
     }
 
-    private String getFileKey() {
-        String key = context.getFileKey();
-        try {
-            Object sonarComponentsField = FieldUtils.readField(context, "sonarComponents", true);
-            if (sonarComponentsField != null) {
-                Object fileSystem = FieldUtils.readField(sonarComponentsField, "fs", true);
-                if (fileSystem != null) {
-                    Object baseDir = FieldUtils.readField(fileSystem, "baseDir", true);
-                    if (baseDir != null) {
-                        String dir;
-                        Object dirPath = FieldUtils.readField(baseDir, "path", true);
-                        if (dirPath instanceof Path) {
-                            Path projectDirectory = (Path) dirPath;
-                            dir = projectDirectory.toString();
-                        } else if (dirPath instanceof String) {
-                            dir = (String) dirPath;
-                        } else {
-                            return key;
-                        }
-
-                        key = key.substring(dir.length() + 1);
-                        key = key.replace('\\', '/');
-                        key = project + ":" + key;
-                    }
-                }
+    private Object getField(Object object, String... fields) {
+        Object result = object;
+        for (String field : fields) {
+            try {
+                result = FieldUtils.readField(result, field, true);
+            } catch (IllegalAccessException e) {
+                return null;
             }
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
         }
-        return key;
+        return result;
     }
 
+    private String getBaseDir(JavaFileScannerContext context) {
+        Object baseDir = getField(context, "sonarComponents", "fs", "baseDir");
+        if (baseDir == null) {
+            return null;
+        }
+        if (baseDir instanceof Path) {
+            Path projectDirectory = (Path) baseDir;
+            return projectDirectory.toString();
+        }
+        Object dir = getField(baseDir, "path");
+        if (dir instanceof String) {
+            return (String) baseDir;
+        }
+        return null;
+
+    }
+
+    private String getFileKey() {
+        String key = context.getFileKey();
+
+        String dir = getBaseDir(context);
+        if (dir == null) {
+            return key;
+        }
+
+        key = key.substring(dir.length() + 1);
+        key = key.replace('\\', '/');
+        key = project + ":" + key;
+
+        return key;
+    }
 }
