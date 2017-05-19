@@ -49,9 +49,15 @@ public class SonarDbClient {
 	private static final String SELECT_CHILD_CLASSES = "SELECT * FROM Measurement_Framework_Components WHERE superclass = ? AND type = 1";
 	private static final String SELECT_ROOT_CLASSES = "SELECT * FROM Measurement_Framework_Components WHERE (superclass IS NULL OR superclass NOT IN (SELECT fullyQualifiedName FROM Measurement_Framework_Components WHERE projectKey = ?)) AND TYPE = 1 AND projectKey = ?";
 	private static final String SELECT_CLASSES_FOR_PROJECT = "SELECT * FROM Measurement_Framework_Components WHERE TYPE = 1 AND parent IS NULL AND projectKey = ?";
-	private static final String SELECT_BOUNDARIES_FOR_METRIC = "SELECT min(m.value) as min_value, max(m.value) as max_value FROM measurement_framework_recent_measures m " +
+	private static final String SELECT_BOUNDARIES_FOR_METRIC = "SELECT min(m.value) as min_value, max(m.value) as max_value FROM Measurement_Framework_Recent_Measures m " +
 			"JOIN measurement_framework_components c on (m.componentsid = c.id) " +
 			"WHERE c.projectkey = ? and m.metricsid = ? and c.type = 1";
+
+	private static final String SELECT_COMPONENTS_FOR_PROJECT = "SELECT * FROM Measurement_Framework_Components WHERE projectKey = ?";
+	private static final String SELECT_MEASURES_FOR_CLASS_METHOD = "SELECT * FROM Measurement_Framework_Measures " +
+			"JOIN Measurement_Framework_Components components on (componentsid = components.id) " +
+			"WHERE components.type = 2 AND components.parent = ? AND Metricsid = ?;";
+
 
 	/**
 	 * Constructor
@@ -100,23 +106,7 @@ public class SonarDbClient {
 	 * @return collections of components
 	 */
 	public Collection<ClassComponent> getClassComponentsOfProject(String projectKey) {
-		Collection<ClassComponent> components = new ArrayList<>();
-		try (Connection connection = this.dataSource.getConnection()) {
-			try (PreparedStatement findClasses = connection.prepareStatement(SELECT_CLASSES_FOR_PROJECT)) {
-				findClasses.setString(1, projectKey);
-				try (ResultSet queryResult = findClasses.executeQuery()) {
-					while (queryResult.next()) {
-						ClassComponent component = parseClassFromQuery(queryResult);
-						if (component != null) {
-							components.add(component);
-						}
-					}
-				}
-			}
-		} catch (SQLException e) {
-			log.warn("Can't retrieve components", e);
-		}
-		return components;
+		return getClasses(SELECT_CLASSES_FOR_PROJECT, projectKey);
 	}
 
 	/** Get component from DB
@@ -295,15 +285,11 @@ public class SonarDbClient {
 				.build();
 	}
 
-	/** Get child classes for superClass
-	 * @param superClass the superClass
-	 * @return collections of components
-	 */
-	private Collection<ClassComponent> getChildClassesFor(String superClass) {
+	private Collection<ClassComponent> getClasses(String sql, String param) {
 		Collection<ClassComponent> components = new ArrayList<>();
 		try (Connection connection = this.dataSource.getConnection()) {
-			try (PreparedStatement findClasses = connection.prepareStatement(SELECT_CHILD_CLASSES)) {
-				findClasses.setString(1, superClass);
+			try (PreparedStatement findClasses = connection.prepareStatement(sql)) {
+				findClasses.setString(1, param);
 				try (ResultSet queryResult = findClasses.executeQuery()) {
 					while (queryResult.next()) {
 						ClassComponent component = parseClassFromQuery(queryResult);
@@ -317,6 +303,14 @@ public class SonarDbClient {
 			log.warn("Can't retrieve components", e);
 		}
 		return components;
+	}
+
+	/** Get child classes for superClass
+	 * @param superClass the superClass
+	 * @return collections of components
+	 */
+	private Collection<ClassComponent> getChildClassesFor(String superClass) {
+		return getClasses(SELECT_CHILD_CLASSES, superClass);
 	}
 
 	/**
