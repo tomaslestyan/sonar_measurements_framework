@@ -4,6 +4,7 @@
  */
 package main.java.framework.visitors.java;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -95,7 +96,6 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 	}
 
 	/**
-	 * @param context
 	 * @return 
 	 */
 	private String getProjectKey() {
@@ -126,7 +126,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		if (tree.parent() instanceof ClassTree) {
 			parentID = getClassId((ClassTree) tree.parent());
 		}
-		String fileKey = context.getFileKey();
+		String fileKey = getFileKey();
 		String componentID = getClassId(tree);
 		TypeTree superClass = tree.superClass();
 		ListTree<TypeTree> superInterfaces = tree.superInterfaces();
@@ -169,7 +169,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		if (parent instanceof ClassTree) {
 			String parentID = getClassId((ClassTree) parent);
 			String componentID = parentID + "->" + getMethodID(tree);
-			client.saveComponent(componentID, context.getFileKey(), project, parentID, Scope.METHOD.getValue(),
+			client.saveComponent(componentID, getFileKey(), project, parentID, Scope.METHOD.getValue(),
 					packageName, null, null, Collections.emptyList(), tree.firstToken().line(), tree.lastToken().line());
 			saveMetrics(tree, componentID, Scope.METHOD);
 		} else {
@@ -249,5 +249,48 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		return name;
 	}
 
+	private Object getField(Object object, String... fields) {
+		Object result = object;
+		for (String field : fields) {
+			try {
+				result = FieldUtils.readField(result, field, true);
+			} catch (IllegalAccessException e) {
+				return null;
+			}
+		}
+		return result;
+	}
+
+	private String getBaseDir(JavaFileScannerContext context) {
+		Object baseDir = getField(context, "sonarComponents", "fs", "baseDir");
+		if (baseDir == null) {
+			return null;
+		}
+		if (baseDir instanceof Path) {
+			Path projectDirectory = (Path) baseDir;
+			return projectDirectory.toString();
+		}
+		Object dir = getField(baseDir, "path");
+		if (dir instanceof String) {
+			return (String) baseDir;
+		}
+		return null;
+
+	}
+
+	private String getFileKey(){
+		String key = context.getFileKey();
+
+		String dir = getBaseDir(context);
+		if (dir == null) {
+			return key;
+		}
+
+		key = key.substring(dir.length() + 1);
+		key = key.replace('\\', '/');
+		key = project + ":" + key;
+
+		return key;
+	}
 
 }
