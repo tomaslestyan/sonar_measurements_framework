@@ -206,8 +206,11 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
         SaveMetricsClient client = new SaveMetricsClient(DataSourceProvider.getDataSource());
         MetricsRegister.getFrameworkMetrics().forEach(x -> {
             ICommonVisitor javaVisitor = MetricsRegister.getMetricVisitorForLanguage(x, Language.JAVA);
+            if (javaVisitor == null) {
+                return;
+            }
             boolean isInScope = javaVisitor.getScope() == Scope.ALL || javaVisitor.getScope() == scope;
-            if ((javaVisitor != null) && javaVisitor instanceof AVisitor && isInScope) {
+            if (javaVisitor instanceof AVisitor && isInScope) {
                 AVisitor visitor = (AVisitor) javaVisitor;
                 visitor.scanTree(tree);
                 client.saveMeasure(x, componentID, visitor.getResult());
