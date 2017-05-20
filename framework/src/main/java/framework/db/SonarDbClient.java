@@ -53,6 +53,12 @@ public class SonarDbClient {
 			"JOIN measurement_framework_components c on (m.componentsid = c.id) " +
 			"WHERE c.projectkey = ? and m.metricsid = ? and c.type = 1";
 
+
+	private static final String SELECT_CLASSES_ID_FOR_PROJECT = "SELECT id FROM Measurement_Framework_Components WHERE projectKey = ? WHERE type = 1";
+	private static final String SELECT_MEASURES_FOR_METHODS = "SELECT value FROM Measurement_Framework_Measures " +
+			"JOIN Measurement_Framework_Components components on (componentsid = components.id) " +
+			"WHERE components.type = 2 AND components.parent = ? AND Metricsid = ?;";
+
 	/**
 	 * Constructor
 	 * @param dataSource
@@ -366,4 +372,43 @@ public class SonarDbClient {
 		}
 		return null;
 	}
+
+	public Collection<String> getClassesIdForProject(String projectKey) {
+		Collection<String> classes = new ArrayList<>();
+		try (Connection connection = this.dataSource.getConnection()) {
+			try (PreparedStatement selectClasses = connection.prepareStatement(SELECT_CLASSES_ID_FOR_PROJECT)) {
+				selectClasses.setString(1, projectKey);
+				try (ResultSet queryResult = selectClasses.executeQuery()) {
+					while (queryResult.next()) {
+						classes.add(queryResult.getString("id"));
+					}
+					return  classes;
+				}
+			}
+		} catch (SQLException e) {
+			log.warn("Can't retrieve boundaries for metric", e);
+		}
+		return null;
+	}
+
+	public Collection<Integer> getMeasurementsForAllMethodsInClass(String metric, String classComponent) {
+		Collection<Integer> components = new ArrayList<>();
+		try (Connection connection = this.dataSource.getConnection()) {
+			try (PreparedStatement selectMeasures = connection.prepareStatement(SELECT_MEASURES_FOR_METHODS)) {
+				selectMeasures.setString(1, classComponent);
+				selectMeasures.setString(2, metric);
+				try (ResultSet queryResult = selectMeasures.executeQuery()) {
+					while (queryResult.next()) {
+						components.add(queryResult.getInt("value"));
+					}
+					return  components;
+				}
+			}
+		} catch (SQLException e) {
+			log.warn("Can't retrieve boundaries for metric", e);
+		}
+		return null;
+	}
+
+
 }
