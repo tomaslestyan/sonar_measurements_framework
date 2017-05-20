@@ -19,7 +19,14 @@ public class DistinctCallsVisitor  extends AVisitor{
     /* (non-Javadoc)
  * @see main.java.framework.api.ICommonVisitor#getKey()
  */
+
+    public static final int METHOD_NAME = 0;
+    public static final int METHOD_OWNER = 1;
+    public static final int CALLING_METHOD = 2;
+    public static final int CALLING_CLASS = 3;
+
     private Set<String[]> encounteredMethods;
+
     private String visitedClass;
     private String visitedMethod;
 
@@ -36,9 +43,6 @@ public class DistinctCallsVisitor  extends AVisitor{
         return "calls";
     }
 
-    /* (non-Javadoc)
-     * @see main.java.framework.api.ICommonVisitor#getScope()
-     */
     @Override
     public Scope getScope() {
         return Scope.METHOD;
@@ -49,13 +53,7 @@ public class DistinctCallsVisitor  extends AVisitor{
         if (tree instanceof MethodTree){
             MethodTree methodTree = (MethodTree) tree;
             visitedMethod = methodTree.symbol().name();
-            Symbol owner = methodTree.symbol().owner();
-            if (owner instanceof JavaSymbol.TypeJavaSymbol){
-                JavaSymbol.TypeJavaSymbol ownerSymbol = (JavaSymbol.TypeJavaSymbol) owner;
-                visitedClass = ownerSymbol.getFullyQualifiedName();
-            } else {
-                visitedClass = methodTree.symbol().owner().name();
-            }
+            visitedClass = getOwnerName(methodTree.symbol());
         } else {
             visitedMethod = tree.toString();
         }
@@ -64,27 +62,28 @@ public class DistinctCallsVisitor  extends AVisitor{
 
     @Override
     public void visitMethodInvocation(MethodInvocationTree tree){
-        Symbol owner = tree.symbol().owner();
-        String ownerName;
 
-        if(owner instanceof JavaSymbol.TypeJavaSymbol){
-            JavaSymbol.TypeJavaSymbol ownerSymbol = (JavaSymbol.TypeJavaSymbol) owner;
-            ownerName = ownerSymbol.getFullyQualifiedName();
-        } else {
-            ownerName = owner.name();
-        }
 
         String[] credentials = new String[4];
-        credentials[0] = tree.symbol().name();
-        credentials[1] = ownerName;
-        credentials[2] = visitedMethod;
-        credentials[3] = visitedClass;
-
+        credentials[METHOD_NAME] = tree.symbol().name();
+        credentials[METHOD_OWNER] = getOwnerName(tree.symbol());
+        credentials[CALLING_METHOD] = visitedMethod;
+        credentials[CALLING_CLASS] = visitedClass;
 
 
         if (!encounteredMethods.contains(credentials)){
             encounteredMethods.add(credentials);
             super.count++;
+        }
+    }
+
+    private String getOwnerName(Symbol symbol){
+        Symbol ownerSymbol = symbol.owner();
+        if(ownerSymbol.isTypeSymbol()){
+            JavaSymbol.TypeJavaSymbol ownerTypeSymbol = (JavaSymbol.TypeJavaSymbol) ownerSymbol;
+            return ownerTypeSymbol.getFullyQualifiedName();
+        } else {
+            return ownerSymbol.name();
         }
     }
 }

@@ -1,12 +1,13 @@
 package main.java.framework.visitors.java;
 
 import main.java.framework.api.Scope;
-import org.sonar.plugins.java.api.tree.MethodTree;
 import org.sonar.plugins.java.api.tree.Tree;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import static main.java.framework.visitors.java.DistinctCallsVisitor.METHOD_OWNER;
 
 /**
  * @author Filip Čekovský (433588)
@@ -23,35 +24,26 @@ public class FanOutVisitor extends AVisitor {
 
     @Override
     public Scope getScope() {
-        return Scope.CLASS;
+        return Scope.METHOD;
     }
 
     @Override
     public void scanTree(Tree tree){
+
         distinctCallsVisitor = new DistinctCallsVisitor();
+        distinctCallsVisitor.scanTree(tree);
         super.scanTree(tree);
     }
 
     @Override
-    public void visitMethod(MethodTree tree){
-        distinctCallsVisitor.scanTree(tree);
-    }
-
-    @Override
     public int getResult(){
-        if(distinctCallsVisitor != null) {
-            Collection<String[]> methods = distinctCallsVisitor.getEncounteredMethods();
-            Set<String> calledClasses = new HashSet<>();
+        Collection<String[]> methods = distinctCallsVisitor.getEncounteredMethods();
+        Set<String> calledClasses = new HashSet<>();
 
-            for (String[] credentials : methods) {
-                if (!credentials[1].equals(credentials[3])) {
-                    calledClasses.add(credentials[1]);
-                }
-            }
-
-            return calledClasses.size();
-        } else {
-            return 0;
+        for (String[] credentials : methods) {
+            calledClasses.add(credentials[METHOD_OWNER]);
         }
+
+        return calledClasses.size();
     }
 }
