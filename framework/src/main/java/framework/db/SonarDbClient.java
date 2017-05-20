@@ -106,7 +106,7 @@ public class SonarDbClient {
 				findClasses.setString(1, projectKey);
 				try (ResultSet queryResult = findClasses.executeQuery()) {
 					while (queryResult.next()) {
-						ClassComponent component = parseClassFromQuery(queryResult);
+						ClassComponent component = (ClassComponent) parseComponentFromQuery(queryResult);
 						if (component != null) {
 							components.add(component);
 						}
@@ -274,7 +274,7 @@ public class SonarDbClient {
 		String parentID = queryResult.getString("parent");
 		String packageName = queryResult.getString("package");
 		String fullyQualifiedName = queryResult.getString("fullyQualifiedName");
-        String superclass = queryResult.getString("superclass");
+		String superclass = queryResult.getString("superclass");
 		String interfaces = queryResult.getString("interfaces");
 		int start = queryResult.getInt("STARTLINE");
 		int end = queryResult.getInt("ENDLINE");
