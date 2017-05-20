@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import main.java.framework.visitors.java.*;
 import org.sonar.api.measures.CoreMetrics;
 import org.sonar.api.measures.Metric;
 import org.sonar.api.measures.Metrics;
@@ -21,6 +20,19 @@ import com.google.common.collect.ImmutableMap;
 
 import main.java.framework.api.ICommonVisitor;
 import main.java.framework.api.Language;
+
+import main.java.framework.visitors.java.ClassLinesOfCodeVisitor;
+import main.java.framework.visitors.java.ComplexityVisitor;
+import main.java.framework.visitors.java.DataAccessVisitor;
+import main.java.framework.visitors.java.DistinctCallsVisitor;
+import main.java.framework.visitors.java.FanOutVisitor;
+import main.java.framework.visitors.java.ForeignDataProvidersVisitor;
+import main.java.framework.visitors.java.LinesOfCodeVisitor;
+import main.java.framework.visitors.java.LocalityOfAttributesVisitor;
+import main.java.framework.visitors.java.MaxNestingVisitor;
+import main.java.framework.visitors.java.NumberOfAttributesVisitor;
+import main.java.framework.visitors.java.NumberOfMethodsVisitor;
+import main.java.framework.visitors.java.VariableVisitor;
 
 /**
  * Class for register metrics. It registers metric for SonarQube but mainly it just connects the metrics with their visitors.
