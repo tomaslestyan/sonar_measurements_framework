@@ -44,7 +44,7 @@ public class ClassComponent extends AComponent {
 	 * @param startLine 
 	 */
 	ClassComponent(String id, String sonarComponentID, String fileKey, String sonarFileKey, String packageName, String parentClass, String superClass, Collection<String> interfaces, Collection<IComponent> children,
-			Map<String, Integer> measures,boolean isInterface, int startLine, int endLine, Collection<ClassComponent> childrenClasses) {
+			Map<String, Integer> measures, boolean isInterface, int startLine, int endLine, Collection<ClassComponent> childrenClasses) {
 		super(id, sonarComponentID, fileKey, parentClass, Scope.CLASS, children, measures, startLine, endLine);
   
 		this.interfaces = (interfaces == null) ? Collections.emptyList() : interfaces;
