@@ -105,7 +105,7 @@ public class MetricsRegister implements Metrics {
 			.create();
 
 	public static final Metric<Integer> FANOUT = new Metric.Builder("fanout", "fanout", Metric.ValueType.INT)
-			.setDescription("Number of distinct classes called by a class")
+			.setDescription("Number of distinct classes called by a method")
 			.setQualitative(false)
 			.setDomain(CoreMetrics.DOMAIN_GENERAL)
 			.create();

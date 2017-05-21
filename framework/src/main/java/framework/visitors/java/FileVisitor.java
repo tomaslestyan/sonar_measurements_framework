@@ -137,9 +137,10 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
         String componentID = getClassId(tree);
         TypeTree superClass = tree.superClass();
         ListTree<TypeTree> superInterfaces = tree.superInterfaces();
+        boolean isInterface = tree.declarationKeyword().text().equals("interface");
         client.saveComponent(componentID, fileKey, project, parentID,
                 Scope.CLASS.getValue(), packageName, getClassName(tree), extractFullyQualifiedName(superClass), superInterfaces.stream().map(x ->
-                        extractFullyQualifiedName(x)).collect(Collectors.toList()), line, endLine);
+                        extractFullyQualifiedName(x)).collect(Collectors.toList()), isInterface, line, endLine);
         saveMetrics(tree, componentID, Scope.CLASS);
         super.visitClass(tree);
     }
@@ -177,7 +178,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
             String parentID = getClassId((ClassTree) parent);
             String componentID = parentID + "->" + getMethodID(tree);
             client.saveComponent(componentID, getFileKey(), project, parentID, Scope.METHOD.getValue(),
-                    packageName, null, null, Collections.emptyList(), tree.firstToken().line(), tree.lastToken().line());
+                    packageName, null, null, Collections.emptyList(), false, tree.firstToken().line(), tree.lastToken().line());
             saveMetrics(tree, componentID, Scope.METHOD);
         } else {
             log.error("No enclosing class found for method " + tree.simpleName().name());

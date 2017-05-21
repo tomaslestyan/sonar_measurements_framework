@@ -7,8 +7,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static main.java.framework.visitors.java.DistinctCallsVisitor.METHOD_OWNER;
-
 /**
  * @author Filip Čekovský (433588)
  * @version 18.05.2017
@@ -37,11 +35,11 @@ public class FanOutVisitor extends AVisitor {
 
     @Override
     public int getResult(){
-        Collection<String[]> methods = distinctCallsVisitor.getEncounteredMethods();
+        Collection<DistinctCallsVisitor.Credentials> methods = distinctCallsVisitor.getEncounteredMethods();
         Set<String> calledClasses = new HashSet<>();
 
-        for (String[] credentials : methods) {
-            calledClasses.add(credentials[METHOD_OWNER]);
+        for (DistinctCallsVisitor.Credentials credentials : methods) {
+            calledClasses.add(credentials.methodOwnerClass);
         }
 
         return calledClasses.size();

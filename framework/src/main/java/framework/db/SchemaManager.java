@@ -30,6 +30,7 @@ public class SchemaManager {
             "fullyQualifiedName varchar(255), " +
             "superClass varchar(255), " +
             "interfaces varchar(65536) NOT NULL, " +
+            "isInterface BIT, " +
             "startLine int, " +
             "endLine int, " +
             "PRIMARY KEY (id));";
