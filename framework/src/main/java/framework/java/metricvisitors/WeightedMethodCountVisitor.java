@@ -1,32 +1,29 @@
 /**
  * The MIT License (MIT)
- * Copyright (c) 2016 Tomas Lestyan
+ * Copyright (c) 2016 FI MUNI
  */
-package main.java.framework.visitors.java;
+package main.java.framework.java.metricvisitors;
 
 import org.sonar.plugins.java.api.tree.MethodTree;
 
 import main.java.framework.api.Scope;
 
 /**
- * TODO
- * @author Tomas Lestyan
+ * Visitor of Weighted Method Count metric
+ * @author Tomas
  */
-public class NumberOfMethodsVisitor extends AVisitor {
-
-	public final static String KEY = "nom";
-
+public class WeightedMethodCountVisitor extends AVisitor {
 
 	/* (non-Javadoc)
-	 * @see main.java.visitors.ADisharmonyVisitor#getKey()
+	 * @see main.java.framework.api.ICommonVisitor#getKey()
 	 */
 	@Override
 	public String getKey() {
-		return KEY;
+		return "wmc";
 	}
 
 	/* (non-Javadoc)
-	 * @see main.java.visitors.ADisharmonyVisitor#getScope()
+	 * @see main.java.framework.api.ICommonVisitor#getScope()
 	 */
 	@Override
 	public Scope getScope() {
@@ -38,7 +35,9 @@ public class NumberOfMethodsVisitor extends AVisitor {
 	 */
 	@Override
 	public void visitMethod(MethodTree tree) {
-		count++;
+		ComplexityVisitor cycloVysitor = new ComplexityVisitor();
+		cycloVysitor.scanTree(tree);
+		count += cycloVysitor.getResult();
 	}
 
 }

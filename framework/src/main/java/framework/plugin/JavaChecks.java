@@ -10,7 +10,7 @@ import java.util.Collections;
 import org.sonar.plugins.java.api.CheckRegistrar;
 import org.sonar.plugins.java.api.JavaCheck;
 
-import main.java.framework.visitors.java.FileVisitor;
+import main.java.framework.java.measurement.FileVisitor;
 
 /**
  * Check for SonarQube

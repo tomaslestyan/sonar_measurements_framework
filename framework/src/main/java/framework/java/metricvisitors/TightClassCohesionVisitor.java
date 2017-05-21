@@ -2,7 +2,7 @@
  * The MIT License (MIT)
  * Copyright (c) 2016 FI MUNI
  */
-package main.java.framework.visitors.java;
+package main.java.framework.java.metricvisitors;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -98,7 +98,7 @@ public class TightClassCohesionVisitor extends AVisitor {
 		methodAccesses.forEach((k, v) -> {
 			methodAccessesToCompare.remove(k);
 			if (!methodAccessesToCompare.isEmpty()) {
-				computePairs(k, v, methodAccessesToCompare);				
+				computePairs(v, methodAccessesToCompare);				
 			}
 		});
 		return super.getResult();
@@ -110,7 +110,7 @@ public class TightClassCohesionVisitor extends AVisitor {
 	 * @param accesses
 	 * @param methodAccessesToCompare
 	 */
-	private void computePairs(String methodName, Collection<String> accesses, Map<String, Collection<String>> methodAccessesToCompare) {
+	private void computePairs(Collection<String> accesses, Map<String, Collection<String>> methodAccessesToCompare) {
 		methodAccessesToCompare.forEach((k, v) -> {
 			long matches = v.stream().filter(accesses::contains).count();
 			if (matches > 0) {

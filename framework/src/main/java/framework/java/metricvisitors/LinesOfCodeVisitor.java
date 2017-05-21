@@ -2,15 +2,14 @@
  * The MIT License (MIT)
  * Copyright (c) 2016 Tomas Lestyan
  */
-package main.java.framework.visitors.java;
+package main.java.framework.java.metricvisitors;
 
 import org.sonar.plugins.java.api.tree.Tree;
 
 import main.java.framework.api.Scope;
 
 /**
- * TODO
- *
+ * Visitor for loc metric
  * @author Tomas Lestyan
  */
 public class LinesOfCodeVisitor extends AVisitor {

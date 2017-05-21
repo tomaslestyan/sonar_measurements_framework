@@ -1,4 +1,4 @@
-package main.java.framework.visitors.java;
+package main.java.framework.java.metricvisitors;
 
 import main.java.framework.api.Scope;
 import org.sonar.plugins.java.api.tree.Tree;

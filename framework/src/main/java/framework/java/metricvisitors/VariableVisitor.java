@@ -1,7 +1,7 @@
 /**
  *
  */
-package main.java.framework.visitors.java;
+package main.java.framework.java.metricvisitors;
 
 import org.sonar.plugins.java.api.tree.VariableTree;
 
