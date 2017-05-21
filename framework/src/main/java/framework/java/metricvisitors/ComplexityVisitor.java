@@ -2,7 +2,7 @@
  * The MIT License (MIT)
  * Copyright (c) 2016 Tomas Lestyan
  */
-package main.java.framework.visitors.java;
+package main.java.framework.java.metricvisitors;
 
 import org.sonar.plugins.java.api.tree.CaseLabelTree;
 import org.sonar.plugins.java.api.tree.CatchTree;
@@ -17,9 +17,8 @@ import org.sonar.plugins.java.api.tree.WhileStatementTree;
 
 import main.java.framework.api.Scope;
 
-//FIXME compute also conditional OR and conditonal AND
 /**
- * TODO
+ * Cyclomatic complexity visitor
  * @author Tomas Lestyan
  */
 public class ComplexityVisitor extends AVisitor {

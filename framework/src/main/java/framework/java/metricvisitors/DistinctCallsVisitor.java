@@ -1,4 +1,4 @@
-package main.java.framework.visitors.java;
+package main.java.framework.java.metricvisitors;
 
 import com.sonar.sslr.api.AstNode;
 import main.java.framework.api.Scope;

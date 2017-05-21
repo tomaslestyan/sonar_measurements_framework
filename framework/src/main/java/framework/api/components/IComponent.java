@@ -52,7 +52,6 @@ public interface IComponent {
 
 	/**
 	 * @return the measures of the component (key: metric, value: measure for the metric)
-	 * FIXME <Object, Object> is only for evaluation purpose, should be changed into something reasonable
 	 */
 	Map<String, Integer> getMeasures();
 
