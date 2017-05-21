@@ -36,11 +36,10 @@ public class SchemaManager {
 			"endLine int, " +
 			"PRIMARY KEY (id));";
 
-	private static final String MEASURES_COLUMNS =
-			"(id varchar(255) NOT NULL, " +
-					"value int, " +
-					"ComponentsId varchar(255) NOT NULL REFERENCES Measurement_Framework_Components (id), " +
-					"MetricsId varchar(255) NOT NULL REFERENCES Metrics (name), PRIMARY KEY (id));";
+	private static final String MEASURES_COLUMNS = "(id varchar(255) NOT NULL, " +
+			"value int, " +
+			"ComponentsId varchar(255) NOT NULL REFERENCES Measurement_Framework_Components (id), " +
+			"MetricsId varchar(255) NOT NULL REFERENCES Metrics (name), PRIMARY KEY (id));";
 
 	private static final String CREATE_MEASURES = "CREATE TABLE IF NOT EXISTS Measurement_Framework_Measures " + MEASURES_COLUMNS;
 
