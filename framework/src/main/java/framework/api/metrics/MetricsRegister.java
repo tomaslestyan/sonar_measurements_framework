@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableMap;
 
 import main.java.framework.api.ICommonVisitor;
 import main.java.framework.api.Language;
+import main.java.framework.java.metricvisitors.AtfdClassVisitor;
 import main.java.framework.java.metricvisitors.ClassLinesOfCodeVisitor;
 import main.java.framework.java.metricvisitors.ComplexityVisitor;
 import main.java.framework.java.metricvisitors.DataAccessVisitor;
@@ -88,6 +89,11 @@ public class MetricsRegister implements Metrics {
 			.setQualitative(false)
 			.setDomain(CoreMetrics.DOMAIN_GENERAL)
 			.create();
+	public static final Metric<Integer> ATFD_CLASS = new Metric.Builder("atfd_class", "atfd_class", Metric.ValueType.INT)
+			.setDescription("Access To Foreign Data for Classes")
+			.setQualitative(false)
+			.setDomain(CoreMetrics.DOMAIN_GENERAL)
+			.create();
 	public static final Metric<Integer> LAA = new Metric.Builder("laa", "laa", Metric.ValueType.INT)
 			.setDescription("Locality of Attribute Accesses")
 			.setQualitative(false)
@@ -138,6 +144,7 @@ public class MetricsRegister implements Metrics {
 			.put(FANOUT, Arrays.asList(new FanOutVisitor()))
 			.put(WMC, Arrays.asList(new WeightedMethodCountVisitor()))
 			.put(TCC, Arrays.asList(new TightClassCohesionVisitor()))
+			.put(ATFD_CLASS, Arrays.asList(new AtfdClassVisitor()))
 			.build();
 
 	/**
@@ -164,7 +171,7 @@ public class MetricsRegister implements Metrics {
 	 * @return all metrics computed by measurement framework
 	 */
 	public static final List<Metric> getFrameworkMetrics() {
-		return asList(LOC, LOC_CLASS, NOAV, CYCLO, MAXNESTING, NOA, NOM, LAA, ATFD, FDP, CALLS, FANOUT, WMC, TCC);
+		return asList(LOC, LOC_CLASS, NOAV, CYCLO, MAXNESTING, NOA, NOM, LAA, ATFD, ATFD_CLASS, FDP, CALLS, FANOUT, WMC, TCC);
 	}
 
 	/* (non-Javadoc)
