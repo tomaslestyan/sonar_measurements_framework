@@ -26,6 +26,8 @@ public abstract class AComponent implements IComponent {
 	private String sonarComponentID;
 	/** Key of the owner file */
 	private String fileKey;
+	/** Key of the owner file defined by SonarQube */
+	private String sonarFileKey;
 	/** The parent class of the component (not super class nor interface) in which it is located, null for regular classes */
 	private String parentClass;
 	/** Collection of child components, e.g., nested classes, anonymous classes or methods  */
@@ -48,11 +50,12 @@ public abstract class AComponent implements IComponent {
 	 * @param endLine 
 	 * @param startLine 
 	 */
-	protected AComponent(String id, String sonarComponentID, String fileKey, String parentClass, Scope scope, 
+	protected AComponent(String id, String sonarComponentID, String fileKey, String sonarFileKey, String parentClass, Scope scope, 
 			Collection<IComponent> children, Map<String, Integer> measures, int startLine, int endLine) {
 		this.id = id;
 		this.sonarComponentID = sonarComponentID;
 		this.fileKey = fileKey;
+		this.sonarFileKey = sonarFileKey;
 		this.parentClass = parentClass;
 		this.scope = scope;
 		this.measures = measures;
@@ -75,6 +78,14 @@ public abstract class AComponent implements IComponent {
 	@Override
 	public String getFileKey() {
 		return fileKey;
+	}
+
+	/* (non-Javadoc)
+	 * @see main.java.framework.api.components.IComponent#getSonarFileKey()
+	 */
+	@Override
+	public String getSonarFileKey() {
+		return sonarFileKey;
 	}
 
 	/* (non-Javadoc)

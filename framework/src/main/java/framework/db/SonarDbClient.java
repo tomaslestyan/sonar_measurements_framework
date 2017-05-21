@@ -151,6 +151,7 @@ public class SonarDbClient {
 		String id = queryResult.getString("ID");
 		String sonarKey = queryResult.getString("projectKey");
 		String fileKey = queryResult.getString("fileKey");
+		String sonarFileKey = queryResult.getString("sonarfileKey");
 		String parentID = queryResult.getString("parent");
 		String packageName = queryResult.getString("package");
 		String superclass = queryResult.getString("superclass");
@@ -163,6 +164,7 @@ public class SonarDbClient {
 					.setId(id)
 					.setSonarProjectID(sonarKey)
 					.setFileKey(fileKey)
+					.setSonarfileKey(sonarFileKey)
 					.setParentClass(parentID)
 					.setMeasures(measures)
 					.setStartLine(start)
@@ -173,6 +175,7 @@ public class SonarDbClient {
 					.setId(id)
 					.setSonarProjectID(sonarKey)
 					.setFileKey(fileKey)
+					.setSonarfileKey(sonarFileKey)
 					.setParentClass(parentID)
 					.setMeasures(measures)
 					.setChildren(getComponents(id))
