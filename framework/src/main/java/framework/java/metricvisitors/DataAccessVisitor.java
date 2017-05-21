@@ -40,6 +40,7 @@ public class DataAccessVisitor extends AVisitor {
 	 */
 	@Override
 	public void scanTree(Tree tree) {
+		providers = new HashSet<>();
 		processParentClass(tree);
 		super.scanTree(tree);
 	}
