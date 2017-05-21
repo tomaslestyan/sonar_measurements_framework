@@ -168,7 +168,6 @@ public class SonarDbClient {
 					.setSonarfileKey(sonarFileKey)
 					.setParentClass(parentID)
 					.setMeasures(measures)
-					.setIsInterface(isInterface)
 					.setStartLine(start)
 					.setEndLine(end)
 					.build();
@@ -184,6 +183,7 @@ public class SonarDbClient {
 					.setPackageName(packageName)
 					.setSuperClass(superclass)
 					.setInterfaces(Lists.newArrayList(Splitter.on(",").split(interfaces)))
+					.setIsInterface(isInterface)
 					.setStartLine(start)
 					.setEndLine(end)
 					.build();
