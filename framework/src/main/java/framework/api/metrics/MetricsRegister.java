@@ -161,7 +161,7 @@ public class MetricsRegister implements Metrics {
 	}
 
 	/**
-	 * @return TODO
+	 * @return all metrics computed by measurement framework
 	 */
 	public static final List<Metric> getFrameworkMetrics() {
 		return asList(LOC, LOC_CLASS, NOAV, CYCLO, MAXNESTING, NOA, NOM, LAA, ATFD, FDP, CALLS, FANOUT, WMC, TCC);

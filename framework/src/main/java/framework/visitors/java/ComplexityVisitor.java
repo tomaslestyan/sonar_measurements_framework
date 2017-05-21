@@ -17,9 +17,8 @@ import org.sonar.plugins.java.api.tree.WhileStatementTree;
 
 import main.java.framework.api.Scope;
 
-//FIXME compute also conditional OR and conditonal AND
 /**
- * TODO
+ * Cyclomatic complexity visitor
  * @author Tomas Lestyan
  */
 public class ComplexityVisitor extends AVisitor {

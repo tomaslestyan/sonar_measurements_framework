@@ -5,9 +5,9 @@
 package main.java.framework.api;
 
 /**
- * TODO
+ * Programing Language enumeration
  * @author Tomas
  */
 public enum Language {
-	JAVA, PHP, UNKNOWN;
+	JAVA, PHP, CPP, C, CSHARP, JavaScript, PYTHON, UNKNOWN;
 }

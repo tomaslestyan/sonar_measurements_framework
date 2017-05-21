@@ -9,7 +9,7 @@ import org.sonar.plugins.java.api.tree.Tree;
 import main.java.framework.api.Scope;
 
 /**
- * TODO
+ * Visitor for FDP metric
  * @author Tomas
  */
 public class ForeignDataProvidersVisitor extends AVisitor {

@@ -1,29 +1,24 @@
 package main.java.framework.visitors.java;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.sonar.plugins.java.api.tree.ClassTree;
 import org.sonar.plugins.java.api.tree.MemberSelectExpressionTree;
 import org.sonar.plugins.java.api.tree.MethodInvocationTree;
-import org.sonar.plugins.java.api.tree.MethodTree;
 import org.sonar.plugins.java.api.tree.Tree;
-import org.sonar.plugins.java.api.tree.Tree.Kind;
 
 import com.google.common.base.Objects;
 
 import main.java.framework.api.Scope;
 
 /**
- * TODO
+ * Data access visitor
  * @author Tomas
  */
 public class DataAccessVisitor extends AVisitor {
 
 
-	private List<String> methods;
 	private boolean foreignAccessVisitor;
 	private Set<String> providers;
 	private String className;
@@ -53,10 +48,6 @@ public class DataAccessVisitor extends AVisitor {
 		Tree parent = tree.parent();
 		if (parent instanceof ClassTree) {
 			ClassTree classTree = (ClassTree) parent;
-			this.methods = classTree.members().stream()
-					.filter(x -> x.is(Kind.METHOD))
-					.map(y -> ((MethodTree) y).simpleName().name())
-					.collect(Collectors.toList());
 			this.className = classTree.symbol().name();
 		}
 	}

@@ -9,7 +9,7 @@ import org.sonar.plugins.java.api.tree.Tree;
 import main.java.framework.api.Scope;
 
 /**
- * TODO
+ * Visitor for LAA metric
  * @author Tomas
  */
 public class LocalityOfAttributesVisitor extends AVisitor {

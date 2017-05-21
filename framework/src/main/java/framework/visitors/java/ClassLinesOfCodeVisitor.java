@@ -9,8 +9,7 @@ import org.sonar.plugins.java.api.tree.Tree;
 import main.java.framework.api.Scope;
 
 /**
- * TODO
- *
+ * Lines of code visitor for classses
  * @author Tomas Lestyan
  */
 public class ClassLinesOfCodeVisitor extends AVisitor {

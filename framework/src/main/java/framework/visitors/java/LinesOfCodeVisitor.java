@@ -9,8 +9,7 @@ import org.sonar.plugins.java.api.tree.Tree;
 import main.java.framework.api.Scope;
 
 /**
- * TODO
- *
+ * Visitor for loc metric
  * @author Tomas Lestyan
  */
 public class LinesOfCodeVisitor extends AVisitor {

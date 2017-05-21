@@ -182,14 +182,12 @@ public class Builder {
 	 * @return builded instance of {@link IComponent} or <code>null</code> if something missing
 	 */
 	public IComponent build() {
-		IComponent component = null;
+		IComponent component;
 		switch (type) {
 		case METHOD:
-			// TODO check required parameters
 			component = new MethodComponent(id, sonarComponentID, fileKey, sonarfileKey, parentClass, measures, startLine, endLine);
 			break;
 		case CLASS:
-			// TODO check required parameters
 			component =new ClassComponent(id, sonarComponentID, fileKey, sonarfileKey, packageName, parentClass, superClass, interfaces, children, measures, isInterface, startLine, endLine, childrenClasses);
 			break;
 		default:

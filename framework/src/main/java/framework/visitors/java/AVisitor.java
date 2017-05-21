@@ -27,7 +27,7 @@ public abstract class AVisitor extends BaseTreeVisitor implements ICommonVisitor
 	}
 
 	/**
-	 * TODO
+	 * Scan the given tree. Reset counter
 	 * @param tree
 	 */
 	public void scanTree(Tree tree) {
