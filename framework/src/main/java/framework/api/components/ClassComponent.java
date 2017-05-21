@@ -24,6 +24,8 @@ public class ClassComponent extends AComponent {
 	private Collection<String> interfaces;
 	/** The list of children of the class component */
 	private Collection<ClassComponent> children;
+	/**Decides if class is an interface, or not**/
+	private boolean isInterface;
 
 
 	/**
@@ -42,12 +44,14 @@ public class ClassComponent extends AComponent {
 	 * @param startLine 
 	 */
 	ClassComponent(String id, String sonarComponentID, String fileKey, String sonarFileKey, String packageName, String parentClass, String superClass, Collection<String> interfaces, Collection<IComponent> children,
-			Map<String, Integer> measures, int startLine, int endLine, Collection<ClassComponent> childrenClasses) {
-		super(id, sonarComponentID, fileKey, sonarFileKey, parentClass, Scope.CLASS, children, measures, startLine, endLine);
+			Map<String, Integer> measures, boolean isInterface, int startLine, int endLine, Collection<ClassComponent> childrenClasses) {
+		super(id, sonarComponentID, fileKey, parentClass, Scope.CLASS, children, measures, startLine, endLine);
+  
 		this.interfaces = (interfaces == null) ? Collections.emptyList() : interfaces;
 		this.superClass = superClass;
 		this.packageName = packageName;
 		this.children = childrenClasses;
+		this.isInterface = isInterface;
 
 	}
 
@@ -83,4 +87,6 @@ public class ClassComponent extends AComponent {
 	public Collection<ClassComponent> getChildren() {
 		return children;
 	}
+
+	public boolean isInterface() { return isInterface; }
 }

@@ -21,20 +21,21 @@ public class SchemaManager {
 
 	private HikariDataSource dataSource;
 
-	private static final String CREATE_COMPONENTS = "CREATE TABLE IF NOT EXISTS Measurement_Framework_Components (" +
-			"id varchar(255) NOT NULL, " +
-			"projectKey varchar(255) NOT NULL, " +
-			"fileKey varchar(255) NOT NULL, " +
-			"sonarfileKey varchar(255) NOT NULL, " +
-			"parent varchar(255), " +
-			"type int NOT NULL,  " +
-			"package varchar(255) NOT NULL, " +
-			"fullyQualifiedName varchar(255), " +
-			"superClass varchar(255), " +
-			"interfaces varchar(65536) NOT NULL, " +
-			"startLine int, " +
-			"endLine int, " +
-			"PRIMARY KEY (id));";
+    private static final String CREATE_COMPONENTS = "CREATE TABLE IF NOT EXISTS Measurement_Framework_Components (" +
+            "id varchar(255) NOT NULL, " +
+            "projectKey varchar(255) NOT NULL, " +
+            "fileKey varchar(255) NOT NULL, " +
+            "sonarfileKey varchar(255) NOT NULL, " +
+            "parent varchar(255), " +
+            "type int NOT NULL,  " +
+            "package varchar(255) NOT NULL, " +
+            "fullyQualifiedName varchar(255), " +
+            "superClass varchar(255), " +
+            "interfaces varchar(65536) NOT NULL, " +
+            "isInterface BIT, " +
+            "startLine int, " +
+            "endLine int, " +
+            "PRIMARY KEY (id));";
 
 	private static final String MEASURES_COLUMNS = "(id varchar(255) NOT NULL, " +
 			"value int, " +

@@ -46,6 +46,8 @@ public class Builder {
 	private int endLine;
 	/** The list of children of the class component */
 	private Collection<ClassComponent> childrenClasses;
+	/**Decides if class is an interface**/
+	private boolean isInterface;
 
 	/**
 	 * Constructor
@@ -145,6 +147,10 @@ public class Builder {
 		return this;
 	}
 
+	public Builder setIsInterface(boolean isInterface){
+		this.isInterface = isInterface;
+		return this;
+	}
 	/**
 	 * @param startLine the startLine to set
 	 * @return the instance of the builder
@@ -184,7 +190,7 @@ public class Builder {
 			break;
 		case CLASS:
 			// TODO check required parameters
-			component = new ClassComponent(id, sonarComponentID, fileKey, sonarfileKey, packageName, parentClass, superClass, interfaces, children, measures, startLine, endLine, childrenClasses);
+			component =new ClassComponent(id, sonarComponentID, fileKey, sonarfileKey, packageName, parentClass, superClass, interfaces, children, measures, isInterface, startLine, endLine, childrenClasses);
 			break;
 		default:
 			component = null;
