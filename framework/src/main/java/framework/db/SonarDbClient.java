@@ -47,7 +47,7 @@ public class SonarDbClient {
 	private static final String SELECT_MEASURES_FOR_METRIC = "SELECT * FROM Measurement_Framework_Measures WHERE Metricsid = ?;";
 	private static final String SELECT_RECENT_MEASURES_FOR_METRIC = "SELECT * Measurement_Framework_Recent_Measures WHERE Metricsid = ?;";
 	private static final String SELECT_CHILD_CLASSES = "SELECT * FROM Measurement_Framework_Components WHERE superclass = ? AND type = 1";
-	private static final String SELECT_ROOT_CLASSES = "SELECT * FROM Measurement_Framework_Components WHERE (superclass IS NULL OR superclass NOT IN (SELECT fullyQualifiedName FROM Measurement_Framework_Components WHERE projectKey = ?)) AND TYPE = 1 AND projectKey = ?";
+	private static final String SELECT_ROOT_CLASSES = "SELECT * FROM Measurement_Framework_Components WHERE ((superclass IS NULL) OR (superclass NOT IN (SELECT fullyQualifiedName FROM Measurement_Framework_Components WHERE projectKey = ? AND TYPE = 1 AND fullyqualifiedname IS NOT NULL))) AND TYPE = 1 AND projectKey = ?";
 	private static final String SELECT_CLASSES_FOR_PROJECT = "SELECT * FROM Measurement_Framework_Components WHERE TYPE = 1 AND parent IS NULL AND projectKey = ?";
 	private static final String SELECT_BOUNDARIES_FOR_METRIC = "SELECT min(m.value) as min_value, max(m.value) as max_value FROM measurement_framework_recent_measures m " +
 			"JOIN measurement_framework_components c on (m.componentsid = c.id) " +
