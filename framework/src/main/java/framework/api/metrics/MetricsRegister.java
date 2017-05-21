@@ -4,7 +4,7 @@
  */
 package main.java.framework.api.metrics;
 
-import static java.util.Arrays.asList;
+import static java.util.Arrays.*;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableMap;
 
 import main.java.framework.api.ICommonVisitor;
 import main.java.framework.api.Language;
-
 import main.java.framework.visitors.java.ClassLinesOfCodeVisitor;
 import main.java.framework.visitors.java.ComplexityVisitor;
 import main.java.framework.visitors.java.DataAccessVisitor;
@@ -32,7 +31,9 @@ import main.java.framework.visitors.java.LocalityOfAttributesVisitor;
 import main.java.framework.visitors.java.MaxNestingVisitor;
 import main.java.framework.visitors.java.NumberOfAttributesVisitor;
 import main.java.framework.visitors.java.NumberOfMethodsVisitor;
+import main.java.framework.visitors.java.TightClassCohesionVisitor;
 import main.java.framework.visitors.java.VariableVisitor;
+import main.java.framework.visitors.java.WeightedMethodCountVisitor;
 
 /**
  * Class for register metrics. It registers metric for SonarQube but mainly it just connects the metrics with their visitors.
@@ -110,6 +111,18 @@ public class MetricsRegister implements Metrics {
 			.setDomain(CoreMetrics.DOMAIN_GENERAL)
 			.create();
 
+	public static final Metric<Integer> TCC = new Metric.Builder("tcc", "tcc", Metric.ValueType.INT)
+			.setDescription("Number of tight class cohesion pairs")
+			.setQualitative(false)
+			.setDomain(CoreMetrics.DOMAIN_GENERAL)
+			.create();
+
+	public static final Metric<Integer> WMC = new Metric.Builder("wmc", "wmc", Metric.ValueType.INT)
+			.setDescription("Weighted metod count computed by their cyclomatic complexity")
+			.setQualitative(false)
+			.setDomain(CoreMetrics.DOMAIN_GENERAL)
+			.create();
+
 	private static final Map<Metric<? extends Serializable> , Collection<ICommonVisitor>> metricVisitors = ImmutableMap.<Metric<? extends Serializable> , Collection<ICommonVisitor>> builder()
 			.put(LOC, Arrays.asList(new LinesOfCodeVisitor()))
 			.put(LOC_CLASS, Arrays.asList(new ClassLinesOfCodeVisitor()))
@@ -123,6 +136,8 @@ public class MetricsRegister implements Metrics {
 			.put(FDP, Arrays.asList(new ForeignDataProvidersVisitor()))
 			.put(CALLS, Arrays.asList(new DistinctCallsVisitor()))
 			.put(FANOUT, Arrays.asList(new FanOutVisitor()))
+			.put(WMC, Arrays.asList(new WeightedMethodCountVisitor()))
+			.put(TCC, Arrays.asList(new TightClassCohesionVisitor()))
 			.build();
 
 	/**
@@ -149,7 +164,7 @@ public class MetricsRegister implements Metrics {
 	 * @return TODO
 	 */
 	public static final List<Metric> getFrameworkMetrics() {
-		return asList(LOC, LOC_CLASS, NOAV, CYCLO, MAXNESTING, NOA, NOM, LAA, ATFD, FDP, CALLS, FANOUT);
+		return asList(LOC, LOC_CLASS, NOAV, CYCLO, MAXNESTING, NOA, NOM, LAA, ATFD, FDP, CALLS, FANOUT, WMC, TCC);
 	}
 
 	/* (non-Javadoc)
