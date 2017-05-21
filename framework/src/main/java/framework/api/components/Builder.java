@@ -26,6 +26,8 @@ public class Builder {
 	private String sonarComponentID;
 	/** Key of the owner file */
 	private String fileKey;
+	/** Key of the owner file defined by SonarQube */
+	private String sonarfileKey;
 	/** The parent class of the component (not super class nor interface) in which it is located, null for regular classes */
 	private String parentClass;
 	/** Collection of child components, e.g., nested classes, anonymous classes or methods  */
@@ -79,6 +81,15 @@ public class Builder {
 	 */
 	public Builder setFileKey(String fileKey) {
 		this.fileKey = fileKey;
+		return this;
+	}
+
+	/**
+	 * @param sonarfileKey the sonarfileKey to set
+	 * @return the instance of the builder
+	 */
+	public Builder setSonarfileKey(String sonarfileKey) {
+		this.sonarfileKey = sonarfileKey;
 		return this;
 	}
 
@@ -158,6 +169,10 @@ public class Builder {
 		return this;
 	}
 
+	/**
+	 * @param childrenClasses
+	 * @return
+	 */
 	public Builder setChildrenClasses(Collection<ClassComponent> childrenClasses) {
 		this.childrenClasses = childrenClasses;
 		return this;
@@ -171,11 +186,11 @@ public class Builder {
 		switch (type) {
 		case METHOD:
 			// TODO check required parameters
-			component =new MethodComponent(id, sonarComponentID, fileKey, parentClass, measures, startLine, endLine);
+			component = new MethodComponent(id, sonarComponentID, fileKey, sonarfileKey, parentClass, measures, startLine, endLine);
 			break;
 		case CLASS:
 			// TODO check required parameters
-			component =new ClassComponent(id, sonarComponentID, fileKey, packageName, parentClass, superClass, interfaces, children, measures, isInterface, startLine, endLine, childrenClasses);
+			component =new ClassComponent(id, sonarComponentID, fileKey, sonarfileKey, packageName, parentClass, superClass, interfaces, children, measures, isInterface, startLine, endLine, childrenClasses);
 			break;
 		default:
 			component = null;

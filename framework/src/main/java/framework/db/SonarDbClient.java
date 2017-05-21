@@ -106,7 +106,7 @@ public class SonarDbClient {
 				findClasses.setString(1, projectKey);
 				try (ResultSet queryResult = findClasses.executeQuery()) {
 					while (queryResult.next()) {
-						ClassComponent component = parseClassFromQuery(queryResult);
+						ClassComponent component = (ClassComponent) parseComponentFromQuery(queryResult);
 						if (component != null) {
 							components.add(component);
 						}
@@ -151,6 +151,7 @@ public class SonarDbClient {
 		String id = queryResult.getString("ID");
 		String sonarKey = queryResult.getString("projectKey");
 		String fileKey = queryResult.getString("fileKey");
+		String sonarFileKey = queryResult.getString("sonarfileKey");
 		String parentID = queryResult.getString("parent");
 		String packageName = queryResult.getString("package");
 		String superclass = queryResult.getString("superclass");
@@ -164,6 +165,7 @@ public class SonarDbClient {
 					.setId(id)
 					.setSonarProjectID(sonarKey)
 					.setFileKey(fileKey)
+					.setSonarfileKey(sonarFileKey)
 					.setParentClass(parentID)
 					.setMeasures(measures)
 					.setIsInterface(isInterface)
@@ -175,6 +177,7 @@ public class SonarDbClient {
 					.setId(id)
 					.setSonarProjectID(sonarKey)
 					.setFileKey(fileKey)
+					.setSonarfileKey(sonarFileKey)
 					.setParentClass(parentID)
 					.setMeasures(measures)
 					.setChildren(getComponents(id))
@@ -276,7 +279,7 @@ public class SonarDbClient {
 		String parentID = queryResult.getString("parent");
 		String packageName = queryResult.getString("package");
 		String fullyQualifiedName = queryResult.getString("fullyQualifiedName");
-        String superclass = queryResult.getString("superclass");
+		String superclass = queryResult.getString("superclass");
 		String interfaces = queryResult.getString("interfaces");
 		int start = queryResult.getInt("STARTLINE");
 		int end = queryResult.getInt("ENDLINE");
