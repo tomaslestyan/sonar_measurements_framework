@@ -20,20 +20,20 @@ import com.google.common.collect.ImmutableMap;
 
 import main.java.framework.api.ICommonVisitor;
 import main.java.framework.api.Language;
-import main.java.framework.visitors.java.ClassLinesOfCodeVisitor;
-import main.java.framework.visitors.java.ComplexityVisitor;
-import main.java.framework.visitors.java.DataAccessVisitor;
-import main.java.framework.visitors.java.DistinctCallsVisitor;
-import main.java.framework.visitors.java.FanOutVisitor;
-import main.java.framework.visitors.java.ForeignDataProvidersVisitor;
-import main.java.framework.visitors.java.LinesOfCodeVisitor;
-import main.java.framework.visitors.java.LocalityOfAttributesVisitor;
-import main.java.framework.visitors.java.MaxNestingVisitor;
-import main.java.framework.visitors.java.NumberOfAttributesVisitor;
-import main.java.framework.visitors.java.NumberOfMethodsVisitor;
-import main.java.framework.visitors.java.TightClassCohesionVisitor;
-import main.java.framework.visitors.java.VariableVisitor;
-import main.java.framework.visitors.java.WeightedMethodCountVisitor;
+import main.java.framework.java.metricvisitors.ClassLinesOfCodeVisitor;
+import main.java.framework.java.metricvisitors.ComplexityVisitor;
+import main.java.framework.java.metricvisitors.DataAccessVisitor;
+import main.java.framework.java.metricvisitors.DistinctCallsVisitor;
+import main.java.framework.java.metricvisitors.FanOutVisitor;
+import main.java.framework.java.metricvisitors.ForeignDataProvidersVisitor;
+import main.java.framework.java.metricvisitors.LinesOfCodeVisitor;
+import main.java.framework.java.metricvisitors.LocalityOfAttributesVisitor;
+import main.java.framework.java.metricvisitors.MaxNestingVisitor;
+import main.java.framework.java.metricvisitors.NumberOfAttributesVisitor;
+import main.java.framework.java.metricvisitors.NumberOfMethodsVisitor;
+import main.java.framework.java.metricvisitors.TightClassCohesionVisitor;
+import main.java.framework.java.metricvisitors.VariableVisitor;
+import main.java.framework.java.metricvisitors.WeightedMethodCountVisitor;
 
 /**
  * Class for register metrics. It registers metric for SonarQube but mainly it just connects the metrics with their visitors.

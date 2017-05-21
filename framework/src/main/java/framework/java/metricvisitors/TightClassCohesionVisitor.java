@@ -2,7 +2,7 @@
  * The MIT License (MIT)
  * Copyright (c) 2016 FI MUNI
  */
-package main.java.framework.visitors.java;
+package main.java.framework.java.metricvisitors;
 
 import java.util.Collection;
 import java.util.HashMap;

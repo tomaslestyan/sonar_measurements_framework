@@ -1,4 +1,4 @@
-package main.java.framework.visitors.java;
+package main.java.framework.java.metricvisitors;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -19,8 +19,11 @@ import main.java.framework.api.Scope;
 public class DataAccessVisitor extends AVisitor {
 
 
+	/** count foreign accesses if <code>true</code> else local accesses */
 	private boolean foreignAccessVisitor;
+	/** The providers of class */
 	private Set<String> providers;
+	/** The name of the class */
 	private String className;
 
 	/**
@@ -42,6 +45,7 @@ public class DataAccessVisitor extends AVisitor {
 	}
 
 	/**
+	 * Proccess parent class
 	 * @param tree
 	 */
 	private void processParentClass(Tree tree) {
@@ -52,6 +56,9 @@ public class DataAccessVisitor extends AVisitor {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see main.java.framework.api.ICommonVisitor#getKey()
+	 */
 	@Override
 	public String getKey() {
 		return "undefined";
@@ -73,35 +80,45 @@ public class DataAccessVisitor extends AVisitor {
 		//format: $expression.$identifier
 		String identifier = tree.methodSelect().lastToken().text();
 		String ownerClass = tree.symbol().owner().name();
-		if (identifier.startsWith("get") && (isForeignCall(ownerClass, className) == foreignAccessVisitor)) {
+		if (identifier.startsWith("get") && 
+				(isForeignCall(ownerClass, className) == foreignAccessVisitor)) {
 			count++;
 			providers.add(ownerClass);
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.sonar.plugins.java.api.tree.BaseTreeVisitor#visitMemberSelectExpression(org.sonar.plugins.java.api.tree.MemberSelectExpressionTree)
+	 */
 	@Override
 	public void visitMemberSelectExpression(MemberSelectExpressionTree tree) {
 		//format: $expression.$identifier
 		boolean variableSymbol = tree.identifier().symbol().isVariableSymbol();
 		String ownerClass = tree.expression().symbolType().symbol().name();
-		if (variableSymbol && isForeignCall(ownerClass, className) == foreignAccessVisitor) {
+		if (variableSymbol && 
+				isForeignCall(ownerClass, className) == foreignAccessVisitor) {
 			count++;
 			providers.add(ownerClass); 
 		}
 		super.visitMemberSelectExpression(tree);
 	}
 
+	/**
+	 * @param ownerClass
+	 * @param currentClass
+	 * @return
+	 */
 	private boolean isForeignCall(String ownerClass, String currentClass) {
 		// called from owner class in case of syntax
 		// 1. this."method"
 		// 2. "method"
 		return !(Objects.equal(ownerClass, currentClass) || "this".equals(ownerClass));
 	}
+
 	/**
 	 * @return the providers
 	 */
 	public Set<String> getProviders() {
 		return providers;
 	}
-
 }

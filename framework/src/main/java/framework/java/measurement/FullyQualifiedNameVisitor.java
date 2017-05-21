@@ -1,4 +1,4 @@
-package main.java.framework.visitors.java;
+package main.java.framework.java.measurement;
 
 import java.util.ArrayList;
 import java.util.List;
