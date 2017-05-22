@@ -7,8 +7,6 @@ import main.java.framework.db.SaveMetricsClient;
 import main.java.framework.db.SonarDbClient;
 import org.sonar.api.ce.measure.Component;
 import org.sonar.api.ce.measure.MeasureComputer;
-import org.sonar.api.measures.CoreMetrics;
-import org.sonar.api.measures.Metric;
 
 import java.util.Collection;
 
@@ -19,28 +17,10 @@ import java.util.Collection;
  */
 public class CycloComplexityComputer implements MeasureComputer{
 
-    public static final Metric<Integer> CYCLO_AVERAGE = new Metric.Builder("cyclo_average", "cyclo_average", Metric.ValueType.INT)
-            .setDescription("Average cyclomatic complexity for class")
-            .setQualitative(false)
-            .setDomain(CoreMetrics.DOMAIN_GENERAL)
-            .create();
-
-    public static final Metric<Integer> CYCLO_TOTAL = new Metric.Builder("cyclo_total", "cyclo_total", Metric.ValueType.INT)
-            .setDescription("Total cyclomatic complexity for class")
-            .setQualitative(false)
-            .setDomain(CoreMetrics.DOMAIN_GENERAL)
-            .create();
-
-    public static final Metric<Integer> CYCLO_MAXIMUM = new Metric.Builder("cyclo_maximum", "cyclo_maximum", Metric.ValueType.INT)
-            .setDescription("Maximum cyclomatic complexity for class")
-            .setQualitative(false)
-            .setDomain(CoreMetrics.DOMAIN_GENERAL)
-            .create();
-
     @Override
     public MeasureComputerDefinition define(MeasureComputerDefinitionContext defContext) {
         return defContext.newDefinitionBuilder()
-                .setOutputMetrics("none")
+                .setOutputMetrics(MetricsRegister.FALSE_METRIC.getKey())
                 .build();
     }
 
@@ -60,8 +40,8 @@ public class CycloComplexityComputer implements MeasureComputer{
         Collection<String> classes = readClient.getClassesIdForProject(projectKey);
         for (String classComponent : classes) {
             Collection<Integer> measurements = readClient.getMeasurementsForAllMethodsInClass(
-                    classComponent,
-                    MetricsRegister.CYCLO.getKey()
+                    MetricsRegister.CYCLO.getKey(),
+                    classComponent
             );
             Integer max = 0;
             Integer total = 0;
@@ -69,10 +49,10 @@ public class CycloComplexityComputer implements MeasureComputer{
                 max = Math.max(max, measurement);
                 total += measurement;
             }
-            Integer average = total / measurements.size();
-            saveClient.saveMeasure(CYCLO_AVERAGE, classComponent, average);
-            saveClient.saveMeasure(CYCLO_MAXIMUM, classComponent, max);
-            saveClient.saveMeasure(CYCLO_TOTAL, classComponent, total);
+            Integer average = measurements.size() != 0 ? total / measurements.size() : 0;
+            saveClient.saveMeasure(MetricsRegister.CYCLO_AVERAGE, classComponent, average);
+            saveClient.saveMeasure(MetricsRegister.CYCLO_MAXIMUM, classComponent, max);
+            saveClient.saveMeasure(MetricsRegister.CYCLO_TOTAL, classComponent, total);
         }
     }
 }

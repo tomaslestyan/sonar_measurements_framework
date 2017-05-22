@@ -54,7 +54,7 @@ public class SonarDbClient {
 			"WHERE c.projectkey = ? and m.metricsid = ? and c.type = 1";
 
 
-	private static final String SELECT_CLASSES_ID_FOR_PROJECT = "SELECT id FROM Measurement_Framework_Components WHERE projectKey = ? WHERE type = 1";
+	private static final String SELECT_CLASSES_ID_FOR_PROJECT = "SELECT id FROM Measurement_Framework_Components WHERE projectKey = ? AND type = 1";
 	private static final String SELECT_MEASURES_FOR_METHODS = "SELECT value FROM Measurement_Framework_Measures " +
 			"JOIN Measurement_Framework_Components components on (componentsid = components.id) " +
 			"WHERE components.type = 2 AND components.parent = ? AND Metricsid = ?;";
@@ -386,7 +386,7 @@ public class SonarDbClient {
 				}
 			}
 		} catch (SQLException e) {
-			log.warn("Can't retrieve boundaries for metric", e);
+			log.warn("Can't retrieve classes id for project", e);
 		}
 		return null;
 	}
@@ -405,7 +405,7 @@ public class SonarDbClient {
 				}
 			}
 		} catch (SQLException e) {
-			log.warn("Can't retrieve boundaries for metric", e);
+			log.warn("Can't retrieve measurements for methods", e);
 		}
 		return null;
 	}
