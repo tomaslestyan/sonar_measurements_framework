@@ -156,7 +156,7 @@ public class SonarDbClient {
 		String packageName = queryResult.getString("package");
 		String superclass = queryResult.getString("superclass");
 		String interfaces = queryResult.getString("interfaces");
-		boolean isInterface = queryResult.getBoolean("isInterface");
+		int isInterface = queryResult.getInt("isInterface");
 		int start = queryResult.getInt("STARTLINE");
 		int end = queryResult.getInt("ENDLINE");
 		Map<String, Integer> measures = getRecentMeasuresForComponent(id);
@@ -183,7 +183,7 @@ public class SonarDbClient {
 					.setPackageName(packageName)
 					.setSuperClass(superclass)
 					.setInterfaces(Lists.newArrayList(Splitter.on(",").split(interfaces)))
-					.setIsInterface(isInterface)
+					.setIsInterface(isInterface > 0)
 					.setStartLine(start)
 					.setEndLine(end)
 					.build();
@@ -276,11 +276,13 @@ public class SonarDbClient {
 		String id = queryResult.getString("ID");
 		String sonarKey = queryResult.getString("projectKey");
 		String fileKey = queryResult.getString("fileKey");
+		String sonarFileKey = queryResult.getString("sonarFileKey");
 		String parentID = queryResult.getString("parent");
 		String packageName = queryResult.getString("package");
 		String fullyQualifiedName = queryResult.getString("fullyQualifiedName");
 		String superclass = queryResult.getString("superclass");
 		String interfaces = queryResult.getString("interfaces");
+		int isInterface = queryResult.getInt("isInterface");
 		int start = queryResult.getInt("STARTLINE");
 		int end = queryResult.getInt("ENDLINE");
 		Map<String, Integer> measures = getRecentMeasuresForComponent(id);
@@ -289,12 +291,14 @@ public class SonarDbClient {
 				.setId(id)
 				.setSonarProjectID(sonarKey)
 				.setFileKey(fileKey)
+				.setSonarfileKey(sonarFileKey)
 				.setParentClass(parentID)
 				.setMeasures(measures)
 				.setChildrenClasses(getChildClassesFor(fullyQualifiedName))
 				.setPackageName(packageName)
 				.setSuperClass(superclass)
 				.setInterfaces(Lists.newArrayList(Splitter.on(",").split(interfaces)))
+				.setIsInterface(isInterface > 0)
 				.setStartLine(start)
 				.setEndLine(end)
 				.build();

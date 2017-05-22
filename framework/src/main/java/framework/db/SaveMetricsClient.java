@@ -108,7 +108,7 @@ public class SaveMetricsClient {
 							updateComponent.setString(7, fqName);
 							updateComponent.setString(8, superClass);
 							updateComponent.setString(9, interfaceJoiner.toString());
-              updateComponent.setBoolean(10, isInterface);
+              				updateComponent.setInt(10, isInterface ? 1 : 0);
 							updateComponent.setInt(11, startLine);
 							updateComponent.setInt(12, endLine);
 							updateComponent.setString(13, id);
@@ -130,7 +130,7 @@ public class SaveMetricsClient {
 							insertComponent.setString(8, fqName);
 							insertComponent.setString(9, superClass);
 							insertComponent.setString(10, interfaceJoiner.toString());
-              insertComponent.setBoolean(11, isInterface);
+							insertComponent.setInt(11, isInterface ? 1 : 0);
 							insertComponent.setInt(12, startLine);
 							insertComponent.setInt(13, endLine);
 							insertComponent.execute();
