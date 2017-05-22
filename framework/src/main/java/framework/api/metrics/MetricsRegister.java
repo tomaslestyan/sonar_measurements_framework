@@ -129,6 +129,33 @@ public class MetricsRegister implements Metrics {
 			.setDomain(CoreMetrics.DOMAIN_GENERAL)
 			.create();
 
+	// This metric is computed by measure computer and therefor is not accessible until server side analysis is done
+	public static final Metric<Integer> CYCLO_AVERAGE = new Metric.Builder("cyclo_average", "cyclo_average", Metric.ValueType.INT)
+			.setDescription("Average cyclomatic complexity for class")
+			.setQualitative(false)
+			.setDomain(CoreMetrics.DOMAIN_GENERAL)
+			.create();
+
+	// This metric is computed by measure computer and therefor is not accessible until server side analysis is done
+	public static final Metric<Integer> CYCLO_TOTAL = new Metric.Builder("cyclo_total", "cyclo_total", Metric.ValueType.INT)
+			.setDescription("Total cyclomatic complexity for class")
+			.setQualitative(false)
+			.setDomain(CoreMetrics.DOMAIN_GENERAL)
+			.create();
+
+	// This metric is computed by measure computer and therefor is not accessible until server side analysis is done
+	public static final Metric<Integer> CYCLO_MAXIMUM = new Metric.Builder("cyclo_maximum", "cyclo_maximum", Metric.ValueType.INT)
+			.setDescription("Maximum cyclomatic complexity for class")
+			.setQualitative(false)
+			.setDomain(CoreMetrics.DOMAIN_GENERAL)
+			.create();
+
+	public static final Metric<Integer> FALSE_METRIC = new Metric.Builder("none", "none", Metric.ValueType.INT)
+			.setDescription("False metric for use in measure computer")
+			.setQualitative(false)
+			.setDomain(CoreMetrics.DOMAIN_GENERAL)
+			.create();
+
 	private static final Map<Metric<? extends Serializable> , Collection<ICommonVisitor>> metricVisitors = ImmutableMap.<Metric<? extends Serializable> , Collection<ICommonVisitor>> builder()
 			.put(LOC, Arrays.asList(new LinesOfCodeVisitor()))
 			.put(LOC_CLASS, Arrays.asList(new ClassLinesOfCodeVisitor()))
@@ -171,7 +198,9 @@ public class MetricsRegister implements Metrics {
 	 * @return all metrics computed by measurement framework
 	 */
 	public static final List<Metric> getFrameworkMetrics() {
-		return asList(LOC, LOC_CLASS, NOAV, CYCLO, MAXNESTING, NOA, NOM, LAA, ATFD, ATFD_CLASS, FDP, CALLS, FANOUT, WMC, TCC);
+		return asList(LOC, LOC_CLASS, NOAV, CYCLO, MAXNESTING, NOA, NOM, LAA, ATFD, ATFD_CLASS,
+				FDP, CALLS, FANOUT, WMC, TCC, CYCLO_AVERAGE, CYCLO_MAXIMUM, CYCLO_TOTAL,
+				FALSE_METRIC);
 	}
 
 	/* (non-Javadoc)
