@@ -4,6 +4,7 @@
  */
 package main.java.framework.plugin;
 
+import main.java.framework.computers.CycloComplexityComputer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.Plugin;
@@ -44,6 +45,6 @@ public class MeasurementsPlugin implements Plugin {
 	 */
 	@Override
 	public void define(Context context) {
-		context.addExtensions(MetricsRegister.class, JavaChecks.class, Rules.class, MeasurementsSensor.class);
+		context.addExtensions(MetricsRegister.class, JavaChecks.class, Rules.class, MeasurementsSensor.class, CycloComplexityComputer.class);
 	}
 }
