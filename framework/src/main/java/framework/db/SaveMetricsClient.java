@@ -108,7 +108,7 @@ public class SaveMetricsClient {
 							updateComponent.setString(7, fqName);
 							updateComponent.setString(8, superClass);
 							updateComponent.setString(9, interfaceJoiner.toString());
-              				updateComponent.setInt(10, isInterface ? 1 : 0);
+              						updateComponent.setInt(10, isInterface ? 1 : 0);
 							updateComponent.setInt(11, startLine);
 							updateComponent.setInt(12, endLine);
 							updateComponent.setString(13, id);
