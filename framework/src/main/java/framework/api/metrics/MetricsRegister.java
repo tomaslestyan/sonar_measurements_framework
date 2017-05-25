@@ -12,6 +12,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sonar.api.config.Settings;
 import org.sonar.api.measures.CoreMetrics;
 import org.sonar.api.measures.Metric;
 import org.sonar.api.measures.Metrics;
@@ -174,6 +177,17 @@ public class MetricsRegister implements Metrics {
 			.put(ATFD_CLASS, Arrays.asList(new AtfdClassVisitor()))
 			.build();
 
+
+	private final Settings settings;
+
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+
+	public MetricsRegister(Settings settings) {
+		this.settings = settings;
+		log.warn(settings.getString("sonar.jdbc.url"));
+
+	}
 	/**
 	 * @return get visitors of metrics
 	 */
@@ -209,6 +223,8 @@ public class MetricsRegister implements Metrics {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public List<Metric> getMetrics() {
+		log.warn("getmetrics");
+		log.warn(settings.getString("sonar.jdbc.url"));
 		return getFrameworkMetrics();
 	}
 }

@@ -14,6 +14,7 @@ import org.apache.commons.lang.reflect.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.Phase;
+import org.sonar.api.config.Settings;
 import org.sonar.check.Rule;
 import org.sonar.plugins.java.api.JavaFileScanner;
 import org.sonar.plugins.java.api.JavaFileScannerContext;
@@ -63,6 +64,8 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 	private String project;
 	private String packageName;
 	private List<String> imports;
+
+
 
 	/* (non-Javadoc)
 	 * @see org.sonar.plugins.java.api.JavaFileScanner#scanFile(org.sonar.plugins.java.api.JavaFileScannerContext)

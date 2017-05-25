@@ -5,8 +5,11 @@ import main.java.framework.db.Configuration;
 import main.java.framework.db.DataSourceProvider;
 import main.java.framework.db.SaveMetricsClient;
 import main.java.framework.db.SonarDbClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.ce.measure.Component;
 import org.sonar.api.ce.measure.MeasureComputer;
+import org.sonar.api.config.Settings;
 
 import java.util.Collection;
 
@@ -17,8 +20,17 @@ import java.util.Collection;
  */
 public class CycloComplexityComputer implements MeasureComputer{
 
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+    private final Settings settings;
+
+    public CycloComplexityComputer(Settings settings) {
+        this.settings = settings;
+    }
+
     @Override
     public MeasureComputerDefinition define(MeasureComputerDefinitionContext defContext) {
+        log.warn(settings.getString("sonar.jdbc.url"));
         return defContext.newDefinitionBuilder()
                 .setOutputMetrics(MetricsRegister.FALSE_METRIC.getKey())
                 .build();
@@ -26,6 +38,7 @@ public class CycloComplexityComputer implements MeasureComputer{
 
     @Override
     public void compute(MeasureComputerContext context) {
+        log.warn(settings.getString("sonar.jdbc.url"));
         Component component = context.getComponent();
         if (component.getType() != Component.Type.PROJECT) {
             return;

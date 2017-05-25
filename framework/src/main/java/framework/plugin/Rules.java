@@ -6,6 +6,7 @@ package main.java.framework.plugin;
 
 import java.util.Arrays;
 
+import org.sonar.api.config.Settings;
 import org.sonar.api.server.rule.RulesDefinition;
 import org.sonar.squidbridge.annotations.AnnotationBasedRulesDefinition;
 
@@ -17,6 +18,12 @@ public class Rules implements RulesDefinition {
 
 	/** The rules repository of the framework */
 	public static final String REPOSITORY = "framework";
+
+	private final Settings settings;
+
+	public Rules(Settings settings) {
+		this.settings = settings;
+	}
 
 	/* (non-Javadoc)
 	 * @see org.sonar.api.server.rule.RulesDefinition#define(org.sonar.api.server.rule.RulesDefinition.Context)
