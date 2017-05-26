@@ -189,7 +189,7 @@ public class SonarDbClient {
 					.setPackageName(packageName)
 					.setSuperClass(superclass)
 					.setInterfaces(Lists.newArrayList(Splitter.on(",").split(interfaces)))
-					.setIsInterface(isInterface > 0)
+					.setIsInterface(isInterface == DatabaseBoolean.TRUE.getValue())
 					.setStartLine(start)
 					.setEndLine(end)
 					.build();
@@ -304,7 +304,7 @@ public class SonarDbClient {
 				.setPackageName(packageName)
 				.setSuperClass(superclass)
 				.setInterfaces(Lists.newArrayList(Splitter.on(",").split(interfaces)))
-				.setIsInterface(isInterface > 0)
+				.setIsInterface(isInterface == DatabaseBoolean.TRUE.getValue())
 				.setStartLine(start)
 				.setEndLine(end)
 				.build();
