@@ -55,7 +55,7 @@ public class SonarDbClient {
 
 
 	private static final String SELECT_CLASSES_ID_FOR_PROJECT = "SELECT id FROM Measurement_Framework_Components WHERE projectKey = ? AND type = 1";
-	private static final String SELECT_MEASURES_FOR_METHODS = "SELECT value FROM Measurement_Framework_Measures " +
+	private static final String SELECT_MEASURES_FOR_METHODS = "SELECT value FROM Measurement_Framework_Recent_Measures " +
 			"JOIN Measurement_Framework_Components components on (componentsid = components.id) " +
 			"WHERE components.type = 2 AND components.parent = ? AND Metricsid = ?;";
 
