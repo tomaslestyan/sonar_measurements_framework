@@ -184,7 +184,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 					// do not fail project scan if one of the visitors throws an exception
 					visitor.scanTree(tree);
 				} catch (Exception e) {
-					log.error("Scan not completed for visitor: " + visitor.getKey() + " on file: " + context.getFileKey());
+					log.error("Scan not completed for visitor: " + visitor.getKey() + " on file: " + context.getFileKey(), e);
 				}
 				client.saveMeasure(x, componentID, visitor.getResult());
 			}
