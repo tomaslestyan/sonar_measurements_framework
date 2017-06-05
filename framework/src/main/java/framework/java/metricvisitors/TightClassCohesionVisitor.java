@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.sonar.plugins.java.api.tree.ClassTree;
+import org.sonar.plugins.java.api.tree.IdentifierTree;
 import org.sonar.plugins.java.api.tree.MethodTree;
 import org.sonar.plugins.java.api.tree.Tree;
 import org.sonar.plugins.java.api.tree.VariableTree;
@@ -61,7 +62,13 @@ public class TightClassCohesionVisitor extends AVisitor {
 	 */
 	@Override
 	public void visitClass(ClassTree tree) {
-		this.className = tree.simpleName().name();
+		IdentifierTree simpleName = tree.simpleName();
+		if (simpleName != null) {			
+			this.className = simpleName.name();
+		} else {
+			//anonymous class
+			this.className = "anonymuous";
+		}
 		super.visitClass(tree);
 	}
 

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.reflect.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.Phase;
@@ -181,7 +180,12 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 			boolean isInScope = javaVisitor.getScope() == Scope.ALL || javaVisitor.getScope() == scope;
 			if (javaVisitor instanceof AVisitor && isInScope) {
 				AVisitor visitor = (AVisitor) javaVisitor;
-				visitor.scanTree(tree);
+				try {
+					// do not fail project scan if one of the visitors throws an exception
+					visitor.scanTree(tree);
+				} catch (Exception e) {
+					log.error("Scan not completed for visitor: " + visitor.getKey() + " on file: " + context.getFileKey());
+				}
 				client.saveMeasure(x, componentID, visitor.getResult());
 			}
 			;
