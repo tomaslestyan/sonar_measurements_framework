@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.Phase;
@@ -70,7 +71,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 	public void scanFile(JavaFileScannerContext context) {
 		this.context = context;
 		this.project = getProjectKey();
-		this.packageName = null;
+		this.packageName = StringUtils.EMPTY;
 		this.imports = new ArrayList<>();
 		CompilationUnitTree tree = context.getTree();
 		scan(tree);
@@ -203,7 +204,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		String simpleName = MeasurementUtils.extractTreeSimpleName(tree);
 		String fqName = null;
 		for (String importSymbol : imports) {
-			if (importSymbol.endsWith(simpleName)) {
+			if ((importSymbol != null) && importSymbol.endsWith(simpleName)) {
 				fqName = importSymbol;
 			}
 		}
