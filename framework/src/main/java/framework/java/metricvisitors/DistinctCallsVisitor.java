@@ -4,10 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import main.java.framework.api.Scope;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.sonar.plugins.java.api.semantic.Symbol;
-import org.sonar.plugins.java.api.tree.IdentifierTree;
-import org.sonar.plugins.java.api.tree.MethodInvocationTree;
-import org.sonar.plugins.java.api.tree.MethodTree;
-import org.sonar.plugins.java.api.tree.Tree;
+import org.sonar.plugins.java.api.tree.*;
 
 import java.util.HashSet;
 import java.util.List;
@@ -91,6 +88,7 @@ public class DistinctCallsVisitor  extends AVisitor{
 
     @Override
     public void visitMethodInvocation(MethodInvocationTree tree){
+        super.visitMethodInvocation(tree);
         Credentials credentials = new Credentials();
 
         credentials.methodOwnerClass = getOwnerName(tree.symbol());
