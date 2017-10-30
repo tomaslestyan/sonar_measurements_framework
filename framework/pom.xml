@@ -9,7 +9,7 @@
 	<packaging>sonar-plugin</packaging>
 
 	<properties>
-		<sonar.version>6.3</sonar.version>
+		<sonar.version>6.3.1</sonar.version>
 		<java.plugin.version>4.5.0.8398</java.plugin.version>
 		<sslr.version>1.21</sslr.version>
 		<gson.version>2.6.2</gson.version>
@@ -24,7 +24,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.sonarsource.java</groupId>
+			<groupId		>org.sonarsource.java</groupId>
 			<artifactId>sonar-java-plugin</artifactId>
 			<type>sonar-plugin</type>
 			<version>${java.plugin.version}</version>
