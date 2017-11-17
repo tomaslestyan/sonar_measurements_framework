@@ -163,6 +163,7 @@ public class SonarDbClient {
 		String superclass = queryResult.getString("superclass");
 		String interfaces = queryResult.getString("interfaces");
 		int isInterface = queryResult.getInt("isInterface");
+		String returnType = queryResult.getString("returnType");
 		int start = queryResult.getInt("STARTLINE");
 		int end = queryResult.getInt("ENDLINE");
 		Map<String, Integer> measures = getRecentMeasuresForComponent(id);
@@ -174,6 +175,7 @@ public class SonarDbClient {
 					.setSonarfileKey(sonarFileKey)
 					.setParentClass(parentID)
 					.setMeasures(measures)
+					.setReturnType(returnType)
 					.setStartLine(start)
 					.setEndLine(end)
 					.build();
@@ -413,6 +415,4 @@ public class SonarDbClient {
 		}
 		return null;
 	}
-
-
 }

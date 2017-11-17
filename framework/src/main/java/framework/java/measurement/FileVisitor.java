@@ -2,12 +2,12 @@
  * The MIT License (MIT)
  * Copyright (c) 2016 FI MUNI
  */
+
 package main.java.framework.java.measurement;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -35,6 +35,8 @@ import main.java.framework.api.metrics.MetricsRegister;
 import main.java.framework.db.DataSourceProvider;
 import main.java.framework.db.SaveMetricsClient;
 import main.java.framework.java.metricvisitors.AVisitor;
+
+import javax.annotation.ParametersAreNonnullByDefault;
 
 /**
  * Class for visiting Java files.
@@ -68,6 +70,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 	 * @see org.sonar.plugins.java.api.JavaFileScanner#scanFile(org.sonar.plugins.java.api.JavaFileScannerContext)
 	 */
 	@Override
+	@ParametersAreNonnullByDefault
 	public void scanFile(JavaFileScannerContext context) {
 		this.context = context;
 		this.project = getProjectKey();
@@ -126,7 +129,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		boolean isInterface = tree.declarationKeyword().text().equals("interface");
 		client.saveComponent(componentID, fileKey, context.getFileKey(), project, parentID,
 				Scope.CLASS.getValue(), packageName, MeasurementUtils.getClassName(tree, packageName), extractFullyQualifiedName(superClass), superInterfaces.stream().map(x ->
-				extractFullyQualifiedName(x)).collect(Collectors.toList()), isInterface, line, endLine);
+				extractFullyQualifiedName(x)).collect(Collectors.toList()), isInterface, "", line, endLine);
 		saveMetrics(tree, componentID, Scope.CLASS);
 		super.visitClass(tree);
 	}
@@ -145,25 +148,21 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		Tree parent = tree.parent();
 		if (parent instanceof ClassTree) {
 			String parentID = MeasurementUtils.getClassId((ClassTree) parent, packageName, project);
-			String componentID = parentID + "->" + getMethodID(tree);
+			String componentID = parentID + "->" + MeasurementUtils.getMethodID(tree);
+			String returnType;
+			if (tree.returnType() == null){
+				returnType = MeasurementUtils.getClassName((ClassTree) parent, packageName);
+			} else {
+				//TODO
+				returnType = tree.returnType().symbolType().name();
+			}
 			client.saveComponent(componentID, getFileKey(), context.getFileKey(), project, parentID, Scope.METHOD.getValue(),
-					packageName, null, null, Collections.emptyList(), false, tree.firstToken().line(), tree.lastToken().line());
+					packageName, null, null, Collections.emptyList(), false, returnType, tree.firstToken().line(), tree.lastToken().line());
 			saveMetrics(tree, componentID, Scope.METHOD);
 		} else {
 			log.error("No enclosing class found for method " + tree.simpleName().name());
 		}
 		super.visitMethod(tree);
-	}
-
-	/**
-	 * @param tree
-	 * @return
-	 */
-	private String getMethodID(MethodTree tree) {
-		String name = tree.simpleName().name();
-		StringJoiner methodDeclaration = new StringJoiner(",", name + "(", ")");
-		tree.parameters().forEach(x -> methodDeclaration.add(x.simpleName().name()));
-		return methodDeclaration.toString();
 	}
 
 	/**

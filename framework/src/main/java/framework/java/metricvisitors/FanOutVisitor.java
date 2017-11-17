@@ -1,6 +1,7 @@
 package main.java.framework.java.metricvisitors;
 
 import main.java.framework.api.Scope;
+import main.java.framework.api.metrics.CallCredentials;
 import org.sonar.plugins.java.api.tree.Tree;
 
 import java.util.Collection;
@@ -29,19 +30,21 @@ public class FanOutVisitor extends AVisitor {
     public void scanTree(Tree tree){
 
         distinctCallsVisitor = new DistinctCallsVisitor();
-        distinctCallsVisitor.scanTree(tree);
+        //distinctCallsVisitor.scanTree(tree);
         super.scanTree(tree);
     }
 
     @Override
     public int getResult(){
-        Collection<DistinctCallsVisitor.Credentials> methods = distinctCallsVisitor.getEncounteredMethods();
+       /* Collection<CallCredentials> methods = distinctCallsVisitor.getEncounteredMethods();
         Set<String> calledClasses = new HashSet<>();
 
-        for (DistinctCallsVisitor.Credentials credentials : methods) {
+        for (CallCredentials credentials : methods) {
             calledClasses.add(credentials.methodOwnerClass);
         }
 
-        return calledClasses.size();
+        return calledClasses.size();\
+        */
+       return 0;
     }
 }

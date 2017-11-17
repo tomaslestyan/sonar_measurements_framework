@@ -5,14 +5,11 @@
 package main.java.framework.java.measurement;
 
 import java.nio.file.Path;
+import java.util.StringJoiner;
 
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.sonar.plugins.java.api.JavaFileScannerContext;
-import org.sonar.plugins.java.api.tree.ClassTree;
-import org.sonar.plugins.java.api.tree.IdentifierTree;
-import org.sonar.plugins.java.api.tree.MemberSelectExpressionTree;
-import org.sonar.plugins.java.api.tree.ParameterizedTypeTree;
-import org.sonar.plugins.java.api.tree.TypeTree;
+import org.sonar.plugins.java.api.tree.*;
 
 /**
  * Utils class for java measurements
@@ -82,8 +79,15 @@ public class MeasurementUtils {
 	 * @param tree
 	 * @return
 	 */
-	static String getClassId(ClassTree tree, String packageName, String project) {
+	public static String getClassId(ClassTree tree, String packageName, String project) {
 		return project + ":" + getClassName(tree, packageName);
+	}
+
+	public static String getMethodID(MethodTree tree) {
+		String name = tree.simpleName().name();
+		StringJoiner methodDeclaration = new StringJoiner(",", name + "(", ")");
+		tree.parameters().forEach(x -> methodDeclaration.add(x.simpleName().name()));
+		return methodDeclaration.toString();
 	}
 
 }

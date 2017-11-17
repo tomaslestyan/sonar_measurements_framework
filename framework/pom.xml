@@ -24,7 +24,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId		>org.sonarsource.java</groupId>
+			<groupId>org.sonarsource.java</groupId>
 			<artifactId>sonar-java-plugin</artifactId>
 			<type>sonar-plugin</type>
 			<version>${java.plugin.version}</version>

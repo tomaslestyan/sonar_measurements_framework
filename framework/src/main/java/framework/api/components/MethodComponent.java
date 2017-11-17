@@ -15,6 +15,11 @@ import main.java.framework.api.Scope;
 public class MethodComponent extends AComponent {
 
 	/**
+	 * Stores return type of the method
+	 */
+	private String returnType;
+
+	/**
 	 * Constructor
 	 * Use {@link Builder} to create this class
 	 * @param id
@@ -24,8 +29,17 @@ public class MethodComponent extends AComponent {
 	 * @param endLine 
 	 * @param startLine 
 	 */
-	MethodComponent(String id, String sonarComponentID, String fileKey, String sonarFileKey, String parentClass, Map<String, Integer> measures, int startLine, int endLine) {
-		super(id, sonarComponentID, fileKey, sonarFileKey, parentClass, Scope.METHOD, null, measures, startLine, endLine);
+	MethodComponent(String id, String sonarComponentID, String fileKey, String sonarFileKey, String parentClass, String returnType, Map<String, Integer> measures, int startLine, int endLine) {
+		super(id, sonarComponentID, fileKey, sonarFileKey, parentClass, Scope.METHOD,null, measures, startLine, endLine);
+		this.returnType = returnType;
+	}
+
+	/**
+	 *
+	 * @return the return type of the method as String
+	 */
+	public String getReturnType() {
+		return returnType;
 	}
 
 	/**

@@ -34,8 +34,8 @@ public class SaveMetricsClient {
 	private HikariDataSource dataSource;
 
 	private static final String FIND_COMPONENT = "SELECT * FROM Measurement_Framework_Components WHERE id = ?;";
-	private static final String INSERT_COMPONENT = "INSERT INTO Measurement_Framework_Components (id, projectKey, fileKey, sonarfileKey, parent, type, package, fullyQualifiedName,  superClass, interfaces, isInterface, startLine, endLine) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-	private static final String UPDATE_COMPONENT = "UPDATE Measurement_Framework_Components SET projectKey = ?, fileKey = ?, sonarfileKey = ?, parent = ?, type = ?, package = ?, fullyQualifiedName = ?, superClass = ?, interfaces = ?, isInterface = ?, startLine = ?, endLine = ? WHERE id = ?;";
+	private static final String INSERT_COMPONENT = "INSERT INTO Measurement_Framework_Components (id, projectKey, fileKey, sonarfileKey, parent, type, package, fullyQualifiedName,  superClass, interfaces, isInterface, returnType, startLine, endLine) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+	private static final String UPDATE_COMPONENT = "UPDATE Measurement_Framework_Components SET projectKey = ?, fileKey = ?, sonarfileKey = ?, parent = ?, type = ?, package = ?, fullyQualifiedName = ?, superClass = ?, interfaces = ?, isInterface = ?, returnType = ?, startLine = ?, endLine = ? WHERE id = ?;";
 
 
 	private static final String COPY_RECENT_MEASURES_TO_MEASURES = "INSERT INTO Measurement_Framework_Measures (id, value , Componentsid, Metricsid) " +
@@ -85,7 +85,7 @@ public class SaveMetricsClient {
 	 * @param startLine
 	 * @param endLine
 	 */
-	public void saveComponent(String id, String fileID, String sonarFileKey, String project, String parent, int type, String packageName, String fqName, String superClass, Collection<String> interfaces, boolean isInterface, int startLine, int endLine) {
+	public void saveComponent(String id, String fileID, String sonarFileKey, String project, String parent, int type, String packageName, String fqName, String superClass, Collection<String> interfaces, boolean isInterface, String returnType, int startLine, int endLine) {
 		log.info("Measurement framework: saving component" + id);
 		StringJoiner interfaceJoiner = new StringJoiner(",");
 		interfaces.forEach(interfaceJoiner::add);
@@ -109,9 +109,10 @@ public class SaveMetricsClient {
 							updateComponent.setString(8, superClass);
 							updateComponent.setString(9, interfaceJoiner.toString());
 							updateComponent.setInt(10, isInterface ? DatabaseBoolean.TRUE.getValue() : DatabaseBoolean.FALSE.getValue());
-							updateComponent.setInt(11, startLine);
-							updateComponent.setInt(12, endLine);
-							updateComponent.setString(13, id);
+							updateComponent.setString(11, returnType);
+							updateComponent.setInt(12, startLine);
+							updateComponent.setInt(13, endLine);
+							updateComponent.setString(14, id);
 							updateComponent.execute();
 
 						} catch (SQLException e) {
@@ -131,8 +132,9 @@ public class SaveMetricsClient {
 							insertComponent.setString(9, superClass);
 							insertComponent.setString(10, interfaceJoiner.toString());
 							insertComponent.setInt(11, isInterface ? DatabaseBoolean.TRUE.getValue() : DatabaseBoolean.FALSE.getValue());
-							insertComponent.setInt(12, startLine);
-							insertComponent.setInt(13, endLine);
+							insertComponent.setString(12, returnType);
+							insertComponent.setInt(13, startLine);
+							insertComponent.setInt(14, endLine);
 							insertComponent.execute();
 
 						} catch (SQLException e) {

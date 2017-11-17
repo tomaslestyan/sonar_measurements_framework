@@ -40,6 +40,8 @@ public class Builder {
 	private String superClass;
 	/** The list of interface classes of the class component, for other components should be <code>null</code> or empty */
 	private Collection<String> interfaces;
+	/** Method return type*/
+	private  String returnType;
 	/** The starting line of the component */
 	private int startLine;
 	/** The ending line of the component */
@@ -51,7 +53,7 @@ public class Builder {
 
 	/**
 	 * Constructor
-	 * @param type
+	 * @param type the type of the component to be build
 	 */
 	public Builder(Scope type) {
 		this.type = type;
@@ -147,10 +149,24 @@ public class Builder {
 		return this;
 	}
 
+	/**
+	 * @param isInterface the isInterface to be set
+	 * @return the instance of the builder
+	 */
 	public Builder setIsInterface(boolean isInterface){
 		this.isInterface = isInterface;
 		return this;
 	}
+
+	/**
+	 * @param returnType the returnType to be set
+	 * @return the instance of the builder
+	 */
+	public Builder setReturnType(String returnType) {
+		this.returnType = returnType;
+		return this;
+	}
+
 	/**
 	 * @param startLine the startLine to set
 	 * @return the instance of the builder
@@ -170,8 +186,8 @@ public class Builder {
 	}
 
 	/**
-	 * @param childrenClasses
-	 * @return
+	 * @param childrenClasses the childrenClasses to be set
+	 * @return the instance of the builder
 	 */
 	public Builder setChildrenClasses(Collection<ClassComponent> childrenClasses) {
 		this.childrenClasses = childrenClasses;
@@ -185,7 +201,7 @@ public class Builder {
 		IComponent component;
 		switch (type) {
 		case METHOD:
-			component = new MethodComponent(id, sonarComponentID, fileKey, sonarfileKey, parentClass, measures, startLine, endLine);
+			component = new MethodComponent(id, sonarComponentID, fileKey, sonarfileKey, parentClass, returnType, measures, startLine, endLine);
 			break;
 		case CLASS:
 			component =new ClassComponent(id, sonarComponentID, fileKey, sonarfileKey, packageName, parentClass, superClass, interfaces, children, measures, isInterface, startLine, endLine, childrenClasses);
