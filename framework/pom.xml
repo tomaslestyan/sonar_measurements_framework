@@ -7,6 +7,7 @@
 	<groupId>tlestyan.thesis</groupId>
 	<artifactId>framework</artifactId>
 	<packaging>sonar-plugin</packaging>
+	<version>1.1.0</version>
 
 	<properties>
 		<sonar.version>6.3.1</sonar.version>
@@ -223,6 +224,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<version>1.1.0</version>
 </project>

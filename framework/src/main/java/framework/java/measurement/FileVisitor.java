@@ -149,13 +149,9 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		if (parent instanceof ClassTree) {
 			String parentID = MeasurementUtils.getClassId((ClassTree) parent, packageName, project);
 			String componentID = parentID + "->" + MeasurementUtils.getMethodID(tree);
-			String returnType;
-			if (tree.returnType() == null){
-				returnType = MeasurementUtils.getClassName((ClassTree) parent, packageName);
-			} else {
-				//TODO
-				returnType = tree.returnType().symbolType().name();
-			}
+			MethodReturnVisitor returnVisitor = new MethodReturnVisitor();
+			tree.accept(returnVisitor);
+			String returnType = returnVisitor.getResult();
 			client.saveComponent(componentID, getFileKey(), context.getFileKey(), project, parentID, Scope.METHOD.getValue(),
 					packageName, null, null, Collections.emptyList(), false, returnType, tree.firstToken().line(), tree.lastToken().line());
 			saveMetrics(tree, componentID, Scope.METHOD);

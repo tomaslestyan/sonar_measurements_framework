@@ -38,7 +38,7 @@ public class MeasurementUtils {
 		return name;
 	}
 
-	static Object getField(Object object, String... fields) {
+	public static Object getField(Object object, String... fields) {
 		Object result = object;
 		for (String field : fields) {
 			try {

@@ -105,18 +105,6 @@ public class MetricsRegister implements Metrics {
 			.setDomain(CoreMetrics.DOMAIN_GENERAL)
 			.create();
 
-	public static final Metric<Integer> CALLS = new Metric.Builder("calls", "calls", Metric.ValueType.INT)
-			.setDescription("Sum of distinct calls in methods")
-			.setQualitative(false)
-			.setDomain(CoreMetrics.DOMAIN_GENERAL)
-			.create();
-
-	public static final Metric<Integer> FANOUT = new Metric.Builder("fanout", "fanout", Metric.ValueType.INT)
-			.setDescription("Number of distinct classes called by a method")
-			.setQualitative(false)
-			.setDomain(CoreMetrics.DOMAIN_GENERAL)
-			.create();
-
 	public static final Metric<Integer> TCC = new Metric.Builder("tcc", "tcc", Metric.ValueType.INT)
 			.setDescription("Number of tight class cohesion pairs")
 			.setQualitative(false)
@@ -167,8 +155,6 @@ public class MetricsRegister implements Metrics {
 			.put(ATFD, Arrays.asList(new DataAccessVisitor(true)))
 			.put(LAA, Arrays.asList(new LocalityOfAttributesVisitor()))
 			.put(FDP, Arrays.asList(new ForeignDataProvidersVisitor()))
-			.put(CALLS, Arrays.asList(new DistinctCallsVisitor()))
-			.put(FANOUT, Arrays.asList(new FanOutVisitor()))
 			.put(WMC, Arrays.asList(new WeightedMethodCountVisitor()))
 			.put(TCC, Arrays.asList(new TightClassCohesionVisitor()))
 			.put(ATFD_CLASS, Arrays.asList(new AtfdClassVisitor()))
@@ -199,7 +185,7 @@ public class MetricsRegister implements Metrics {
 	 */
 	public static final List<Metric> getFrameworkMetrics() {
 		return asList(LOC, LOC_CLASS, NOAV, CYCLO, MAXNESTING, NOA, NOM, LAA, ATFD, ATFD_CLASS,
-				FDP, CALLS, FANOUT, WMC, TCC, CYCLO_AVERAGE, CYCLO_MAXIMUM, CYCLO_TOTAL,
+				FDP, WMC, TCC, CYCLO_AVERAGE, CYCLO_MAXIMUM, CYCLO_TOTAL,
 				FALSE_METRIC);
 	}
 

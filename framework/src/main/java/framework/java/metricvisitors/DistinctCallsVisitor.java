@@ -86,10 +86,6 @@ public class DistinctCallsVisitor  extends AVisitor{
         super.visitMethodInvocation(tree);
     }
 
-    public Set<CallCredentials> getEncounteredMethods() {
-        return encounteredMethods;
-    }
-
     private boolean checkTypes(ExpressionTree tree){
         if (tree instanceof MethodInvocationTree && ((MethodInvocationTree) tree).methodSelect() instanceof MethodInvocationTree){
             ExpressionTree sub = ((MemberSelectExpressionTree)((MethodInvocationTree) tree).methodSelect()).expression();
