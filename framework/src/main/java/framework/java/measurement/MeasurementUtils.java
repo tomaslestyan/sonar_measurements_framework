@@ -71,7 +71,7 @@ public class MeasurementUtils {
 	 * @param tree
 	 * @return
 	 */
-	static String getClassName(ClassTree tree, String packageName) {
+	public static String getClassName(ClassTree tree, String packageName) {
 		return packageName + "." + tree.simpleName().name();
 	}
 

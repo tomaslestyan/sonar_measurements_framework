@@ -24,8 +24,6 @@ import main.java.framework.java.metricvisitors.AtfdClassVisitor;
 import main.java.framework.java.metricvisitors.ClassLinesOfCodeVisitor;
 import main.java.framework.java.metricvisitors.ComplexityVisitor;
 import main.java.framework.java.metricvisitors.DataAccessVisitor;
-import main.java.framework.java.metricvisitors.DistinctCallsVisitor;
-import main.java.framework.java.metricvisitors.FanOutVisitor;
 import main.java.framework.java.metricvisitors.ForeignDataProvidersVisitor;
 import main.java.framework.java.metricvisitors.LinesOfCodeVisitor;
 import main.java.framework.java.metricvisitors.LocalityOfAttributesVisitor;

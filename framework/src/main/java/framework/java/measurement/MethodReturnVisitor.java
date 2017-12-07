@@ -1,19 +1,31 @@
 package main.java.framework.java.measurement;
 
-import org.sonar.plugins.java.api.tree.BaseTreeVisitor;
-import org.sonar.plugins.java.api.tree.IdentifierTree;
-import org.sonar.plugins.java.api.tree.MethodTree;
-import org.sonar.plugins.java.api.tree.PrimitiveTypeTree;
+import org.sonar.plugins.java.api.tree.*;
+
+import java.util.List;
 
 public class MethodReturnVisitor extends BaseTreeVisitor {
 
-    private String result = "";
+    private String packageName;
+    private String identifier = "";
+    private List<String> imports;
+
+    public MethodReturnVisitor(String packageName, List<String> imports){
+        this.packageName = packageName;
+        this.imports = imports;
+    }
+
+    @Override
+    public void visitClass(ClassTree tree) {
+        identifier = MeasurementUtils.getClassName(tree, packageName);
+    }
 
     @Override
     public void visitMethod(MethodTree tree) {
-        tree.returnType();
         if (tree.returnType() == null){
-            //result = this class
+            if (tree.parent() instanceof ClassTree) {
+                tree.parent().accept(this);
+            }
         } else {
             tree.returnType().accept(this);
         }
@@ -21,16 +33,25 @@ public class MethodReturnVisitor extends BaseTreeVisitor {
 
     @Override
     public void visitPrimitiveType(PrimitiveTypeTree tree) {
-        result = tree.toString();
+        identifier = tree.symbolType().name();
     }
 
     @Override
     public void visitIdentifier(IdentifierTree tree) {
-        result += tree.name();
+        if (!identifier.isEmpty()){
+            identifier += ".";
+        }
+        for (String importSymbol : imports) {
+            if ((importSymbol != null) && importSymbol.endsWith(tree.name())) {
+                identifier += importSymbol;
+                return;
+            }
+        }
+        identifier += tree.name();
         super.visitIdentifier(tree);
     }
 
     public String getResult(){
-        return result;
+        return identifier;
     }
 }

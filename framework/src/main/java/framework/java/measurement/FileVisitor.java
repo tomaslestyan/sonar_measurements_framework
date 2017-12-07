@@ -149,7 +149,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		if (parent instanceof ClassTree) {
 			String parentID = MeasurementUtils.getClassId((ClassTree) parent, packageName, project);
 			String componentID = parentID + "->" + MeasurementUtils.getMethodID(tree);
-			MethodReturnVisitor returnVisitor = new MethodReturnVisitor();
+			MethodReturnVisitor returnVisitor = new MethodReturnVisitor(packageName, imports);
 			tree.accept(returnVisitor);
 			String returnType = returnVisitor.getResult();
 			client.saveComponent(componentID, getFileKey(), context.getFileKey(), project, parentID, Scope.METHOD.getValue(),
@@ -184,7 +184,6 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 				}
 				client.saveMeasure(x, componentID, visitor.getResult());
 			}
-			;
 		});
 	}
 
@@ -196,7 +195,10 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		if (tree == null) {
 			return null;
 		}
-		String simpleName = MeasurementUtils.extractTreeSimpleName(tree);
+		return extractFullyQualifiedName(MeasurementUtils.extractTreeSimpleName(tree));
+	}
+
+	private String extractFullyQualifiedName(String simpleName){
 		String fqName = null;
 		for (String importSymbol : imports) {
 			if ((importSymbol != null) && importSymbol.endsWith(simpleName)) {
