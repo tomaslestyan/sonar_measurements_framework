@@ -1,6 +1,7 @@
 /**
  * The MIT License (MIT)
  * Copyright (c) 2016 FI MUNI
+ * Copyright (c) 2017 FI MUNI
  */
 
 package main.java.framework.java.measurement;
@@ -198,6 +199,11 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		return extractFullyQualifiedName(MeasurementUtils.extractTreeSimpleName(tree));
 	}
 
+	/**
+	 * Tries to extract fully qualified name of a class by searching trough the imports
+	 * @param simpleName
+	 * @return fully qualified name if possible, simpleName otherwise
+	 */
 	private String extractFullyQualifiedName(String simpleName){
 		String fqName = null;
 		for (String importSymbol : imports) {
@@ -207,6 +213,7 @@ public class FileVisitor extends BaseTreeVisitor implements JavaFileScanner {
 		}
 		return (fqName != null) ? fqName : packageName.concat("." + simpleName);
 	}
+
 
 	private String getFileKey() {
 		String key = context.getFileKey();

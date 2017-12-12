@@ -44,6 +44,14 @@ public class MeasurementRepository {
 	}
 
 	/**
+	 * @param fileKey key of file which components are to be returned
+	 * @return collection of Class components, that are being located in the file
+	 */
+	public static Collection<ClassComponent> getClassComponentsForFile(String fileKey){
+		SonarDbClient client = new SonarDbClient(DataSourceProvider.getDataSource());
+		return client.getClassComponentsOfFile(fileKey);
+	}
+	/**
 	 * @param id
 	 * @return component with given id if such component exists, <code>null</code> otherwise
 	 */
