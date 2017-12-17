@@ -33,6 +33,7 @@ public class SchemaManager {
             "superClass varchar(255), " +
             "interfaces varchar(65536) NOT NULL, " +
             "isInterface int, " +
+			"returnType varchar(255)," +
             "startLine int, " +
             "endLine int, " +
             "PRIMARY KEY (id));";

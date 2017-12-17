@@ -1,13 +1,11 @@
 /**
  * The MIT License (MIT)
  * Copyright (c) 2016 FI MUNI
+ * Copyright (c) 2017 FI MUNI
  */
 package main.java.framework.db;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,6 +30,7 @@ import main.java.framework.api.components.MethodComponent;
  *
  * @author Tomas Lestyan
  * @author Klara Erlebachova
+ * @author Filip Cekovsky
  */
 public class SonarDbClient {
 
@@ -106,10 +105,31 @@ public class SonarDbClient {
 	 * @return collections of components
 	 */
 	public Collection<ClassComponent> getClassComponentsOfProject(String projectKey) {
+		return getClassComponents(projectKey, SELECT_CLASSES_FOR_PROJECT);
+	}
+
+	private static final String SELECT_CLASSES_FOR_FILE = "SELECT * FROM Measurement_Framework_Components WHERE TYPE = 1 AND fileKey = ?";
+
+	/**
+	 * Get classes located in the file of given Id.
+	 * @param fileKey
+	 * @return Collection of class components
+	 */
+	public Collection<ClassComponent> getClassComponentsOfFile(String fileKey) {
+		return getClassComponents(fileKey, SELECT_CLASSES_FOR_FILE);
+	}
+
+	/**
+	 * Privet method used in other public methods that sets 1. parameter of the query to the value of key parameter.
+	 * @param key
+	 * @param SQLQuery Query to be carried out
+	 * @return collection of class components
+	 */
+	private Collection<ClassComponent> getClassComponents(String key, String SQLQuery){
 		Collection<ClassComponent> components = new ArrayList<>();
 		try (Connection connection = this.dataSource.getConnection()) {
-			try (PreparedStatement findClasses = connection.prepareStatement(SELECT_CLASSES_FOR_PROJECT)) {
-				findClasses.setString(1, projectKey);
+			try (PreparedStatement findClasses = connection.prepareStatement(SQLQuery)) {
+				findClasses.setString(1, key);
 				try (ResultSet queryResult = findClasses.executeQuery()) {
 					while (queryResult.next()) {
 						ClassComponent component = (ClassComponent) parseComponentFromQuery(queryResult);
@@ -120,7 +140,7 @@ public class SonarDbClient {
 				}
 			}
 		} catch (SQLException e) {
-			log.warn("Can't retrieve components", e);
+			log.warn("Can't retrieve components for " + key, e);
 		}
 		return components;
 	}
@@ -148,7 +168,6 @@ public class SonarDbClient {
 
 	/**
 	 * Parse component from query result
-	 *
 	 * @param queryResult
 	 * @throws SQLException
 	 */
@@ -163,6 +182,7 @@ public class SonarDbClient {
 		String superclass = queryResult.getString("superclass");
 		String interfaces = queryResult.getString("interfaces");
 		int isInterface = queryResult.getInt("isInterface");
+		String returnType = queryResult.getString("returnType");
 		int start = queryResult.getInt("STARTLINE");
 		int end = queryResult.getInt("ENDLINE");
 		Map<String, Integer> measures = getRecentMeasuresForComponent(id);
@@ -174,6 +194,7 @@ public class SonarDbClient {
 					.setSonarfileKey(sonarFileKey)
 					.setParentClass(parentID)
 					.setMeasures(measures)
+					.setReturnType(returnType)
 					.setStartLine(start)
 					.setEndLine(end)
 					.build();
@@ -230,14 +251,24 @@ public class SonarDbClient {
 	 * @return measures
 	 */
 	public List<Integer> getMeasures(String metric) {
+		return getMeasuresByQuery(metric, SELECT_MEASURES_FOR_METRIC);
+	}
+
+	/**
+	 * Helper method taht avoids code duplicity for measures extraction.
+	 * @param metric to extract measures for
+	 * @param sqlStatement SQL SELECT to use
+	 * @return collection of obtained values
+	 */
+	private List<Integer> getMeasuresByQuery(String metric, String sqlStatement){
 		try (Connection connection = this.dataSource.getConnection()) {
-			try (PreparedStatement selectMeasures = connection.prepareStatement(SELECT_MEASURES_FOR_METRIC)) {
+			try (PreparedStatement selectMeasures = connection.prepareStatement(sqlStatement)) {
 				List<Integer> measures = new ArrayList<>();
 				selectMeasures.setString(1, metric);
 				try (ResultSet queryResult = selectMeasures.executeQuery()) {
 					while (queryResult.next()) {
 						int value = queryResult.getInt("value");
-						measures.add(Integer.valueOf(value));
+						measures.add(value);
 					}
 				}
 				return measures;
@@ -340,24 +371,15 @@ public class SonarDbClient {
 	 * @return recent measures
 	 */
 	public List<Integer> getRecentMeasures(String metricID) {
-		try (Connection connection = this.dataSource.getConnection()) {
-			try (PreparedStatement selectMeasures = connection.prepareStatement(SELECT_RECENT_MEASURES_FOR_METRIC)) {
-				List<Integer> recentMeasures = new ArrayList<>();
-				selectMeasures.setString(1, metricID);
-				try (ResultSet queryResult = selectMeasures.executeQuery()) {
-					while (queryResult.next()) {
-						int value = queryResult.getInt("value");
-						recentMeasures.add(Integer.valueOf(value));
-					}
-				}
-				return recentMeasures;
-			}
-		} catch (SQLException e) {
-			log.warn("Can't retrieve recent measures", e);
-		}
-		return null;
+		return getMeasuresByQuery(metricID, SELECT_RECENT_MEASURES_FOR_METRIC);
 	}
 
+	/**
+	 * Retrieves min and max value in a project for a metric
+	 * @param projectKey
+	 * @param metric
+	 * @return pair of the min an max values for the metric
+	 */
 	public Pair<Integer, Integer> getBoundariesForMetric(String projectKey, String metric) {
 		try (Connection connection = this.dataSource.getConnection()) {
 			try (PreparedStatement selectBoundaries = connection.prepareStatement(SELECT_BOUNDARIES_FOR_METRIC)) {
@@ -377,6 +399,11 @@ public class SonarDbClient {
 		return null;
 	}
 
+	/**
+	 * Retrievs collection of all classes Ids for certain project.
+	 * @param projectKey of the project
+	 * @return Collection of ids
+	 */
 	public Collection<String> getClassesIdForProject(String projectKey) {
 		Collection<String> classes = new ArrayList<>();
 		try (Connection connection = this.dataSource.getConnection()) {
@@ -395,6 +422,12 @@ public class SonarDbClient {
 		return null;
 	}
 
+	/**
+	 * Retrieves Collection of metric values for certain class'es methods
+	 * @param metric
+	 * @param classComponent
+	 * @return collection of values
+	 */
 	public Collection<Integer> getMeasurementsForAllMethodsInClass(String metric, String classComponent) {
 		Collection<Integer> components = new ArrayList<>();
 		try (Connection connection = this.dataSource.getConnection()) {
@@ -413,6 +446,4 @@ public class SonarDbClient {
 		}
 		return null;
 	}
-
-
 }
